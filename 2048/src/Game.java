@@ -1,8 +1,4 @@
-/**
- * @author Tyler Carberry
- * 2048
- * The main code of the game 2048
- */
+package src;
 
 import java.util.*;
 public class Game implements java.io.Serializable
@@ -798,21 +794,21 @@ public class Game implements java.io.Serializable
 		if(movesRemaining >= 0)
 			output += movesRemaining;
 		else
-			output += "°";
+			output += "ï¿½";
 		
 		output += " Undos Left:";
 		
 		if(undosRemaining >= 0)
 			output += undosRemaining;
 		else
-			output += "°";
+			output += "ï¿½";
 		
 		output += " Time Left:";
 		
 		if(timeLeft >= 0)
 			output += timeLeft;
 		else
-			output += "°";
+			output += "ï¿½";
 		
 		
 		output += "\n---------------------------------------------\n";

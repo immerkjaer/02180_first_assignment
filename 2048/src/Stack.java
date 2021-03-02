@@ -1,8 +1,4 @@
-/** 
- * @author Tyler Carberry
- * Stack
- * Stores the history of the game board and score
- */
+package src;
 
 import java.util.LinkedList;
 public class Stack implements Cloneable, java.io.Serializable
