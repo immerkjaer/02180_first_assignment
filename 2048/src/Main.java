@@ -1,9 +1,4 @@
-/**
- * Tyler Carberry
- * The driver for the game 2048
- * This game is based off the original 2048 made by Gabriele Cirulli
- * at https://github.com/gabrielecirulli/2048
- */
+package src;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

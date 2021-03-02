@@ -1,8 +1,4 @@
-/** 
- * @author Tyler Carberry
- * Location
- * Represents each piece on the board
- */
+package src;
 
 import java.util.LinkedList;
 public class Location implements Cloneable, java.io.Serializable

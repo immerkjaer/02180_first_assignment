@@ -1,8 +1,4 @@
-/**
- * @author Tyler Carberry
- * 2048
- * Different methods to autoplay the game 2048
- */
+package src;
 
 public class Autoplay
 {
