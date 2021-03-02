@@ -1,3 +1,4 @@
 .idea/
 *.iml
 2048/src/*.class
+out/
