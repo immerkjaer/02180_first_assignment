@@ -97,6 +97,7 @@ public class Game implements java.io.Serializable
 		
 	}
 
+	// TODO: rename
 	public int act2(int direction)
 	{
 		Grid lastBoard = this.board.clone();
