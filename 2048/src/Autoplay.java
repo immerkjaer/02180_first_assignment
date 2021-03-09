@@ -1,5 +1,7 @@
 package src;
 
+import java.util.ArrayList;
+
 public class Autoplay
 {
 	// Used for the recursive autoplay method to determine
@@ -66,6 +68,35 @@ public class Autoplay
 		return game.getScore();
 	}
 
+	public static int expectimax(Game game)
+	{
+		int[] hScore = new int[4];
+
+		while(!(game.lost()))
+		{
+			for (var i = 0; i < 4; i++)
+			{
+				hScore[i] = game.act2(i);
+				System.out.println(hScore[i]);
+			}
+			int max = 0;
+			int index = 0;
+			for (var i = 0; i < 4; i++)
+			{
+				if (hScore[i] > max)
+				{
+					index = i;
+					max = hScore[i];
+				}
+			}
+			System.out.println("#######");
+			System.out.println(index);
+			game.act(index);
+			System.out.println(game);
+		}
+
+		return game.getScore();
+	}
 
 	// Moves up, left, up, left until it can't move
 	// then goes right, if still can't move goes down

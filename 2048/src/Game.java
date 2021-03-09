@@ -96,7 +96,27 @@ public class Game implements java.io.Serializable
 		zenMode = toClone.zenMode;
 		
 	}
-	
+
+	public int act2(int direction)
+	{
+		Grid lastBoard = this.board.clone();
+		Grid board = this.board.clone();
+
+		List<Location> locations = board.getLocationsInTraverseOrder(direction);
+
+
+		for(Location loc : locations)
+			move2(board, loc, direction);
+
+		if(board.equals(lastBoard))
+		{
+			return -1;
+		}
+
+		return board.getEmptyLocations().size();
+
+	}
+
 	/**
 	 * Moves the entire board in the given direction
 	 * @param direction Called using a final variable in the location class
@@ -162,6 +182,35 @@ public class Game implements java.io.Serializable
 					if(board.get(from) == board.get(to) || zenMode)
 						add(from, to);
 					
+					return;
+				}
+			}
+		}
+	}
+
+	private void move2(Grid board, Location from, int direction)
+	{
+		// Do not move X spaces or 0 spaces
+		if(board.get(from) != -1 && board.get(from) != 0)
+		{
+			Location to = from.getAdjacent(direction);
+			while(board.isValid(to))
+			{
+				// If the new position is empty, move
+				if(board.isEmpty(to))
+				{
+					board.move(from, to);
+					from = to.clone();
+					to = to.getAdjacent(direction);
+				}
+
+				// If the new position has a piece
+				else
+				{
+					// If they have the same value or if zenMode is enabled, combine
+					if(board.get(from) == board.get(to) || zenMode)
+						add(from, to);
+
 					return;
 				}
 			}
@@ -711,6 +760,11 @@ public class Game implements java.io.Serializable
 			}
 		
 		return highest;
+	}
+
+	public int countEmptyTiles()
+	{
+		return board.getEmptyLocations().size();
 	}
 	
 	/**

@@ -16,7 +16,7 @@ public class Main
 	private static HashMap<Character,Integer> keyMap = new HashMap<Character,Integer>();
 
 	public static void main(String[] args)
-	{	
+	{
 		loadKeyMap();
 		
 		int input = -1;
@@ -68,6 +68,7 @@ public class Main
 
 			input = getIntegerInput(1, 13, "Incorrect input. Enter 1 through 12 with no punctuation");
 
+
 			switch(input)
 			{
 				case 1: practiceMode();
@@ -107,7 +108,7 @@ public class Main
 	// Manual Play
 	//---------------------------------------------------------
 	public static void manualPlay(Game game)
-	{	
+	{
 		String direction = "";
 		
 		// Used to prevent printing Congratulations every move after it is won
@@ -472,11 +473,11 @@ public class Main
 		
 		manualPlay(game);
 	}
-	
+
 	public static void autoplayMode(Game game)
 	{
-		System.out.println("Recursive, Circle, Corner, or Random? 1/2/3/4");	
-		int input = getIntegerInput(1, 4, "Incorrect input. Enter 1, 2, 3 or 4 with no punctuation");
+		System.out.println("Recursive, Circle, Corner, Random or expectimax? 1/2/3/4/5");
+		int input = getIntegerInput(1, 5, "Incorrect input. Enter 1, 2, 3 or 4 with no punctuation");
 
 		switch(input)
 		{
@@ -488,6 +489,7 @@ public class Main
 					break;
 			case 4: Autoplay.randomPlay(game);
 					break;
+			case 5: Autoplay.expectimax(game);
 			
 			default:
 			{	
