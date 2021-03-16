@@ -17,6 +17,8 @@ public class Main
 
 	public static void main(String[] args)
 	{
+		autoplayMode(new Game());
+
 		loadKeyMap();
 		
 		int input = -1;
@@ -476,6 +478,8 @@ public class Main
 
 	public static void autoplayMode(Game game)
 	{
+		Autoplay.MonteCarloSolver(game);
+
 		System.out.println("Recursive, Circle, Corner, Random or expectimax? 1/2/3/4/5");
 		int input = getIntegerInput(1, 5, "Incorrect input. Enter 1, 2, 3 or 4 with no punctuation");
 
@@ -489,7 +493,8 @@ public class Main
 					break;
 			case 4: Autoplay.randomPlay(game);
 					break;
-			case 5: Autoplay.expectimax(game);
+			case 5: Autoplay.MonteCarloSolver(game);
+					break;
 			
 			default:
 			{	

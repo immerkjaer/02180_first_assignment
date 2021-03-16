@@ -1,9 +1,23 @@
 package src;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Autoplay
 {
+	private static class runStats
+	{
+		public final int score;
+		public final int firstMove;
+
+		runStats(int score, int firstMove)
+		{
+			this.score = score;
+			this.firstMove = firstMove;
+		}
+	}
+
 	// Used for the recursive autoplay method to determine
 	// the total number of moves
 	private static int autoMoveCount = 0;
@@ -68,31 +82,112 @@ public class Autoplay
 		return game.getScore();
 	}
 
-	public static int expectimax(Game game)
+	public static runStats randomPlay2(Game game)
 	{
-		int[] hScore = new int[4];
-
+		double num;
+		int firstMove = Integer.MAX_VALUE;
 		while(!(game.lost()))
 		{
-			for (var i = 0; i < 4; i++)
+			num = Math.random();
+
+			if(num > 0.75)
 			{
-				hScore[i] = game.act2(i);
-				System.out.println(hScore[i]);
+				game.act(Location.UP);
+				if (firstMove > 3) { firstMove = Location.UP; }
 			}
-			int max = 0;
-			int index = 0;
-			for (var i = 0; i < 4; i++)
+
+			if(num < 0.75 && num > 0.5)
 			{
-				if (hScore[i] > max)
-				{
-					index = i;
-					max = hScore[i];
-				}
+				game.act(Location.DOWN);
+				if (firstMove > 3) { firstMove = Location.DOWN; }
 			}
+
+			if(num < 0.5 && num > 0.25)
+			{
+				game.act(Location.RIGHT);
+				if (firstMove > 3) { firstMove = Location.RIGHT; }
+			}
+			if(num < 0.25)
+			{
+				game.act(Location.LEFT);
+				if (firstMove > 3) { firstMove = Location.LEFT; }
+			}
+		}
+
+		return new runStats(game.getScore(), firstMove);
+	}
+
+	public static int monteCarlo(Game game)
+	{
+		ArrayList<runStats> runs = new ArrayList<runStats>();
+		ArrayList<Game> games = new ArrayList<Game>();
+		for (var i = 0; i < 500; i++)
+		{
+			games.add(game.clone());
+		}
+
+		for (Game g : games)
+		{
+			var run = randomPlay2(g);
+			runs.add(run);
+
+			// if(g.won()) { break; }
+		}
+		return getBestMove(runs);
+	}
+
+	public static int getBestMove(ArrayList<runStats> runs)
+	{
+		var runsUp = runs.stream().filter(r -> r.firstMove == Location.UP).collect(Collectors.<runStats>toList());
+		var runsDown = runs.stream().filter(r -> r.firstMove == Location.DOWN).collect(Collectors.<runStats>toList());
+		var runsRight = runs.stream().filter(r -> r.firstMove == Location.RIGHT).collect(Collectors.<runStats>toList());
+		var runsLeft = runs.stream().filter(r -> r.firstMove == Location.LEFT).collect(Collectors.<runStats>toList());
+
+		ArrayList<List<runStats>> runsFiltered = new ArrayList<List<runStats>>();
+		runsFiltered.add(runsUp);
+		runsFiltered.add(runsDown);
+		runsFiltered.add(runsRight);
+		runsFiltered.add(runsLeft);
+
+		int bestAvg = 0;
+		int chosenDir = Integer.MIN_VALUE;
+		for (List<runStats> runFil : runsFiltered)
+		{
+			var avgSomeDir = getAvg(runFil);
+			if (bestAvg < avgSomeDir)
+			{
+				bestAvg = avgSomeDir;
+				// will trigger exception with few runs
+				chosenDir = runFil.get(0).firstMove;
+			}
+		}
+
+		return chosenDir;
+
+	}
+
+	public static int getAvg(List<runStats> runs)
+	{
+		var sum = 0;
+		for (runStats r : runs)
+		{
+			sum += r.score;
+		}
+
+		return sum / runs.size();
+	}
+
+	public static int MonteCarloSolver(Game game)
+	{
+		while(!(game.lost()))
+		{
+			var chosenDir = monteCarlo(game);
+			game.act(chosenDir);
+
 			System.out.println("#######");
-			System.out.println(index);
-			game.act(index);
+			System.out.println(chosenDir);
 			System.out.println(game);
+
 		}
 
 		return game.getScore();
