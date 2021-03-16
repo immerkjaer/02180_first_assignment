@@ -9,59 +9,133 @@ public class Autoplay
 	private static int autoMoveCount = 0;
 
 
-
-	
-	
-
-
-	
 	// Moves randomly and returns the final score
-		public static int smartPlay1(Game game)
+		public static int expectimax(Game game)
 		{
-			int[] hScore = new int[4];
-			int max;
-			int move;
-			int gameint=0;
+			int move = Location.DOWN;
+			ArrayList<Integer> invalidMoves = new ArrayList<>();
 
 			while(!(game.lost()))
 			{
 				Grid tmp = game.getGrid().clone();
-				
-				for (int i = 0; i < 4; i++)
-				{
-					Game g = game.clone();
-					g.act2(i);
-					hScore[i] = g.getScore();	
-				}
-
-				max = 0;
-				move = -1;
-				ArrayList<Integer> invalidMoves = new ArrayList<Integer>();
-			
-				while (game.getGrid().equals(tmp)) {
-
-					invalidMoves.add(move);
-					max = 0;
-
-					
-					for (int i = 0; i < 4; i++)
-					{
-						if (hScore[i] >= max && !invalidMoves.contains(i))
-						{
-							move = i;
-							max = hScore[i];
-						}
-					}
-					
-					game.act(move);
-				}
 				invalidMoves.clear();
+				boolean firstMove = true;
+				while (game.getGrid().equals(tmp)) {
+					if (!firstMove) {
+						invalidMoves.add(move);
+					}
+
+					int bestAlignmentDirection = bestAlignment(game, invalidMoves);
+					if (bestAlignmentDirection >= 0 && !invalidMoves.contains(bestAlignmentDirection)) {
+						move = bestAlignmentDirection;
+					} else if (move == Location.DOWN && !invalidMoves.contains(Location.DOWN)) {
+						// direction of move doesn't change
+					} else if (move == Location.RIGHT && !invalidMoves.contains(Location.RIGHT)) {
+						// direction of move doesn't change
+					} else if (!invalidMoves.contains(Location.DOWN)) { //down
+						move = Location.DOWN;
+					} else if (!invalidMoves.contains(Location.RIGHT) && invalidMoves.contains(Location.LEFT)) { //go right if you can't go left
+						move = Location.RIGHT;
+					} else if (!invalidMoves.contains(Location.LEFT) && invalidMoves.contains(Location.RIGHT)) { //go left if you can't go right
+						move = Location.LEFT;
+					} else if (invalidMoves.contains(Location.RIGHT) && invalidMoves.contains(Location.LEFT)) { //up
+						move = Location.UP;
+					} else {
+						move = leftOrRight(game);
+					}
+					System.out.println("Acting " + Location.getLocationString(move));
+					System.out.println("Invalid moves: " + invalidMoves.toString());
+					game.act(move);
+					System.out.println(game);
+					firstMove = false;
+				}
 			}
-			//System.out.println("GAME LOST");
+			System.out.println("GAME LOST");
 			return game.getScore();
 		}
 		
-	
+	public static int leftOrRight(Game game) {
+		Game rightMove = game.clone();
+		Game leftMove = game.clone();
+		int bottomRow = game.getGrid().getNumRows()-1;
+
+		// If bottom is not full, always move right
+		if (!game.getGrid().rowIsFull(bottomRow)) {
+			return Location.RIGHT;
+		}
+
+		rightMove.act2(Location.RIGHT);
+		leftMove.act2(Location.LEFT);
+
+		// Hvis noget kan slås sammen i bunden, så gør vi det til højre
+		if (!rightMove.getGrid().rowIsFull(bottomRow) && game.getGrid().rowIsFull(bottomRow)) {
+			return Location.RIGHT;
+		} else if (leftMove.getGrid().rowIsFull(bottomRow) && leftMove.getGrid().rowAlignments() > 0) {
+			return Location.LEFT;
+		} else if (rightMove.getGrid().getEmptyLocations().size() >= leftMove.getGrid().getEmptyLocations().size()) {
+			return Location.RIGHT;
+		} else {
+			return Location.LEFT;
+		}
+	}
+
+	public static int bestAlignment(Game game, ArrayList<Integer> invalidMoves) {
+		int direction = Location.DOWN;
+		Game rightMove = game.clone();
+		Game leftMove = game.clone();
+		Game downMove = game.clone();
+
+		rightMove.act(Location.RIGHT);
+		leftMove.act(Location.LEFT);
+		downMove.act(Location.DOWN);
+
+		int[] alignments = new int[5];
+
+		// before moving
+		alignments[0] = game.getGrid().rowAlignments();
+		alignments[1] = game.getGrid().columnAlignments();
+		// after moving
+		alignments[2] = invalidMoves.contains(Location.RIGHT) ? 0 : Math.max(rightMove.getGrid().rowAlignments(), rightMove.getGrid().columnAlignments());
+		alignments[3] = invalidMoves.contains(Location.LEFT) ? 0 : Math.max(leftMove.getGrid().rowAlignments(), leftMove.getGrid().columnAlignments());
+		alignments[4] = invalidMoves.contains(Location.DOWN) ? 0 : Math.max(downMove.getGrid().rowAlignments(), downMove.getGrid().columnAlignments());
+
+		int max = 0;
+		int index = 0;
+		for (int i = 0; i < alignments.length; i++) {
+			if (alignments[i] > max) {
+				max = alignments[i];
+				index = i;
+			}
+		}
+		if (max == 0) {
+			index = -1;
+		}
+		switch (index) {
+			case 0:
+				direction = Location.DOWN;
+				break;
+			case 1:
+				if (alignments[2] >= alignments[3]) {
+					direction = Location.RIGHT;
+				} else {
+					direction = Location.LEFT;
+				}
+				break;
+			case 2:
+				direction = Location.RIGHT;
+				break;
+			case 3:
+				direction = Location.LEFT;
+				break;
+			case 4:
+				direction = Location.DOWN;
+				break;
+			default:
+				direction = -1;
+		}
+
+		return direction;
+	}
 
 	// Moves randomly and returns the final score
 	public static int randomPlay(Game game)

@@ -153,6 +153,19 @@ public class Location implements Cloneable, java.io.Serializable
 	{
 		return row + "," + col;
 	}
-	
+
+	public static String getLocationString(int dir){
+		switch (dir) {
+			case UP:
+				return "up";
+			case RIGHT:
+				return "right";
+			case DOWN:
+				return "down";
+			case LEFT:
+				return "left";
+		}
+		return "";
+	}
 	
 }
