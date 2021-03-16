@@ -97,9 +97,9 @@ public class Game implements java.io.Serializable
 		
 	}
 
-	public int act2(int direction)
+	public void act2(int direction)
 	{
-		Grid lastBoard = this.board.clone();
+		//Grid lastBoard = this.board.clone();
 		Grid board = this.board.clone();
 
 		List<Location> locations = board.getLocationsInTraverseOrder(direction);
@@ -108,15 +108,16 @@ public class Game implements java.io.Serializable
 		for(Location loc : locations)
 			move2(board, loc, direction);
 
-		if(board.equals(lastBoard))
-		{
-			return -1;
-		}
 
-		return board.getEmptyLocations().size();
+		//int sc1 = board.getEmptyLocations().size();
+		//int sc = score;
+
+		//return sc1 ;
 
 	}
 
+
+	
 	/**
 	 * Moves the entire board in the given direction
 	 * @param direction Called using a final variable in the location class
