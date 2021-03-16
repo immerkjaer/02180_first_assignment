@@ -71,6 +71,7 @@ public class Main
 
 			switch(input)
 			{
+			/*
 				case 1: practiceMode();
 						break;
 				case 2: normalMode();
@@ -90,7 +91,7 @@ public class Main
 				case 9: zenMode();
 						break;
 				case 10: crazyMode();
-						break;
+						break;*/
 				case 11: customManualPlay();
 						break;
 				case 12: autoplayMode(new Game());
@@ -268,7 +269,21 @@ public class Main
 			System.out.println("Time Played: " + minutes + " minutes " + (seconds + milli) + " seconds");
 		}
 	}
+	
+	 //Expectimax
+		// Unlimited everything
+		public static void AImode()
+		{
+			Game game = new Game();
+			game.setMoveLimit(-1);
+			game.setUndoLimit(-1);
+			game.setTimeLimit(-1);
+			
+			manualPlay(game);
+		}
 
+	
+	
 	// Practice Mode
 	// Unlimited everything
 	public static void practiceMode()
@@ -280,7 +295,7 @@ public class Main
 		
 		manualPlay(game);
 	}
-
+	/*
 	// Normal Mode
 	// Unlimited moves and time
 	// 10 undos
@@ -408,6 +423,7 @@ public class Main
 
 		manualPlay(game);
 	}
+	*/
 	
 	//--------------------------------------------------------------------
 	// Customize Manual Play
@@ -481,16 +497,8 @@ public class Main
 
 		switch(input)
 		{
-			case 1: recursiveHelper(game);
-					break;
-			case 2: Autoplay.circlePlay(game);
-					break;
-			case 3: Autoplay.cornerPlay(game);
-					break;
-			case 4: Autoplay.randomPlay(game);
-					break;
 			case 5: Autoplay.expectimax(game);
-			
+			/*
 			default:
 			{	
 				System.out.println("Developer Mode Enabled");
@@ -501,7 +509,7 @@ public class Main
 					System.out.println(Autoplay.getAutoMoveCount());
 					Autoplay.setAutoMoveCount(0);
 				}
-			}
+			}*/
 		}
 	}
 	

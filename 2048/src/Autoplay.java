@@ -7,28 +7,61 @@ public class Autoplay
 	// Used for the recursive autoplay method to determine
 	// the total number of moves
 	private static int autoMoveCount = 0;
+
+
+
 	
-	// Moves up, left, down, right until it loses and returns the final score
-	public static int circlePlay(Game game)
-	{
-		while(!(game.lost()))
+	
+
+
+	
+	// Moves randomly and returns the final score
+		public static int smartPlay1(Game game)
 		{
-			System.out.println(game);
-			System.out.println("Moving up");
-			game.act(Location.UP);
-			System.out.println(game);
-			System.out.println("Moving left");
-			game.act(Location.LEFT);
-			System.out.println(game);
-			System.out.println("Moving down");
-			game.act(Location.DOWN);
-			System.out.println(game);
-			System.out.println("Moving right");
-			game.act(Location.RIGHT);
+			int[] hScore = new int[4];
+			int max;
+			int move;
+			int gameint=0;
+
+			while(!(game.lost()))
+			{
+				Grid tmp = game.getGrid().clone();
+				
+				for (int i = 0; i < 4; i++)
+				{
+					Game g = game.clone();
+					g.act2(i);
+					hScore[i] = g.getScore();	
+				}
+
+				max = 0;
+				move = -1;
+				ArrayList<Integer> invalidMoves = new ArrayList<Integer>();
+			
+				while (game.getGrid().equals(tmp)) {
+
+					invalidMoves.add(move);
+					max = 0;
+
+					
+					for (int i = 0; i < 4; i++)
+					{
+						if (hScore[i] >= max && !invalidMoves.contains(i))
+						{
+							move = i;
+							max = hScore[i];
+						}
+					}
+					
+					game.act(move);
+				}
+				invalidMoves.clear();
+			}
+			//System.out.println("GAME LOST");
+			return game.getScore();
 		}
-		System.out.println(game);
-		return game.getScore();
-	}
+		
+	
 
 	// Moves randomly and returns the final score
 	public static int randomPlay(Game game)
@@ -37,99 +70,38 @@ public class Autoplay
 		while(!(game.lost()))
 		{
 			num = Math.random();
-
 			if(num > .5)
 				if(num > .75)
 				{
-					System.out.println("Acting up");
+					//System.out.println("Acting up");
 					game.act(Location.UP);
 				}
 				else
 				{
-					System.out.println("Acting left");
+					//System.out.println("Acting left");
 					game.act(Location.LEFT);
 				}
 			else
 				if(num > .25)
 				{
-					System.out.println("Acting down");
+					//System.out.println("Acting down");
 					game.act(Location.DOWN);
 				}
 				else
 				{
-					System.out.println("Acting right");
+					//System.out.println("Acting right");
 					game.act(Location.RIGHT);
 				}
-
-			System.out.println(game);
+			//System.out.println(game);
 		}
-
-		System.out.println("GAME LOST");
+		//System.out.println("GAME LOST");
 		return game.getScore();
 	}
+	
 
-	public static int expectimax(Game game)
-	{
-		int[] hScore = new int[4];
-
-		while(!(game.lost()))
-		{
-			for (var i = 0; i < 4; i++)
-			{
-				hScore[i] = game.act2(i);
-				System.out.println(hScore[i]);
-			}
-			int max = 0;
-			int index = 0;
-			for (var i = 0; i < 4; i++)
-			{
-				if (hScore[i] > max)
-				{
-					index = i;
-					max = hScore[i];
-				}
-			}
-			System.out.println("#######");
-			System.out.println(index);
-			game.act(index);
-			System.out.println(game);
-		}
-
-		return game.getScore();
-	}
-
-	// Moves up, left, up, left until it can't move
-	// then goes right, if still can't move goes down
-	public static int cornerPlay(Game game)
-	{
-		while(!(game.lost()))
-		{
-			while(game.canMove(Location.RIGHT) || game.canMove(Location.UP) ||
-					game.canMove(Location.LEFT))
-			{
-				while(game.canMove(Location.UP) || game.canMove(Location.LEFT))
-				{
-					System.out.println("Acting up");
-					game.act(Location.UP);
-					System.out.println(game);
-
-					System.out.println("Acting left");
-					game.act(Location.LEFT);
-					System.out.println(game);
-				}
-				System.out.println("Acting right");
-				game.act(Location.RIGHT);
-				System.out.println(game);
-			}
-			System.out.println("Acting down");
-			game.act(Location.DOWN);
-			System.out.println(game);
-
-		}
-
-		return game.getScore();
-	}
-
+	
+	
+	
 
 	// I ran the game over 100 times with a 10,000 move limit
 	// The number of moves it took to reach 2048:
@@ -147,7 +119,7 @@ public class Autoplay
 
 		Game lastTurn = game.clone();
 		autoMoveCount += 1;
-		
+
 		// Undos the the entire game every 6000 moves
 		if(tile <= 2048 && autoMoveCount % 6000 == 0)
 		{
@@ -210,10 +182,10 @@ public class Autoplay
 	{
 		return autoMoveCount;
 	}
-	
+
 	public static void setAutoMoveCount(int value)
 	{
 		autoMoveCount = value;
 	}
-	
+
 }
