@@ -86,7 +86,7 @@ public class Autoplay
 	{
 		double num;
 		int firstMove = Integer.MAX_VALUE;
-		while(!(game.lost()))
+		while(!(game.lost() || game.won()))
 		{
 			num = Math.random();
 
@@ -121,7 +121,7 @@ public class Autoplay
 	{
 		ArrayList<runStats> runs = new ArrayList<runStats>();
 		ArrayList<Game> games = new ArrayList<Game>();
-		for (var i = 0; i < 500; i++)
+		for (var i = 0; i < 700; i++)
 		{
 			games.add(game.clone());
 		}
@@ -131,7 +131,7 @@ public class Autoplay
 			var run = randomPlay2(g);
 			runs.add(run);
 
-			// if(g.won()) { break; }
+			if(g.won()) { break; }
 		}
 		return getBestMove(runs);
 	}
@@ -141,6 +141,7 @@ public class Autoplay
 		var runsUp = runs.stream().filter(r -> r.firstMove == Location.UP).collect(Collectors.<runStats>toList());
 		var runsDown = runs.stream().filter(r -> r.firstMove == Location.DOWN).collect(Collectors.<runStats>toList());
 		var runsRight = runs.stream().filter(r -> r.firstMove == Location.RIGHT).collect(Collectors.<runStats>toList());
+
 		var runsLeft = runs.stream().filter(r -> r.firstMove == Location.LEFT).collect(Collectors.<runStats>toList());
 
 		ArrayList<List<runStats>> runsFiltered = new ArrayList<List<runStats>>();
@@ -173,7 +174,10 @@ public class Autoplay
 		{
 			sum += r.score;
 		}
-
+		if (runs.size() == 0)
+		{
+			return 0;
+		}
 		return sum / runs.size();
 	}
 
@@ -183,6 +187,9 @@ public class Autoplay
 		{
 			var chosenDir = monteCarlo(game);
 			game.act(chosenDir);
+
+			// For each direction find how many spots left.
+			//
 
 			System.out.println("#######");
 			System.out.println(chosenDir);
