@@ -2,3 +2,4 @@
 *.iml
 2048/src/*.class
 out/
+.DS_Store
