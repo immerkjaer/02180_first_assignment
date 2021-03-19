@@ -2,9 +2,8 @@ package src;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import java.util.*;
+
 public class Main
 {
 	// All methods can use the scanner without declaring it each time
@@ -495,7 +494,13 @@ public class Main
 
 	public static void autoplayMode(Game game)
 	{
-		AISolver.expectimaxAi(game);
+		ArrayList<LinkedList<AISolver.GameStats>> results = new ArrayList<>();
+		for (int i = 0; i <= 5; i++)
+		{
+			var stats = AISolver.expectimaxAi(new Game());
+			results.add(stats);
+		}
+
 
 		System.out.println("Recursive, Circle, Corner, Random or expectimax? 1/2/3/4/5");
 		int input = getIntegerInput(1, 5, "Incorrect input. Enter 1, 2, 3 or 4 with no punctuation");

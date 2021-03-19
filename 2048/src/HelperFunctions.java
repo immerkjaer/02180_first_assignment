@@ -23,7 +23,30 @@ public class HelperFunctions {
             return false;
         }
 
-        return IntStream.range(0, array.length - 1).noneMatch(i -> array[i] < array[i + 1]);
+        var sorted = IntStream.range(0, array.length - 1).noneMatch(i -> array[i] < array[i + 1]);
+        if (sorted && array[1] == 0)
+        {
+            return false;
+        }
+
+        return sorted;
+    }
+
+    public int[] getTilesAsc(int[][] arr)
+    {
+        ArrayList<Integer> unique = new ArrayList<>();
+        for (var row : arr)
+        {
+            for (var i=0; i <= arr.length-1; i++)
+            {
+                if (!unique.contains(row[i]))
+                {
+                    unique.add(row[i]);
+                }
+            }
+        }
+
+        return unique.stream().sorted().mapToInt(x -> x).toArray();
     }
 
     public ArrayList<Integer> IgnoreMoves(Grid grid)
@@ -163,4 +186,23 @@ public class HelperFunctions {
         }
     }
 
+    public double getVariance(int[] data)
+    {
+        double mean = getMean(data);
+        double temp = 0;
+        int size = data.length;
+
+        for(double a :data)
+            temp += (a-mean)*(a-mean);
+        return temp/(size-1);
+    }
+
+    private double getMean(int[] data)
+    {
+        double sum = 0.0;
+        int size = data.length;
+        for(double a : data)
+            sum += a;
+        return sum/size;
+    }
 }

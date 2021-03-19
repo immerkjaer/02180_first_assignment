@@ -125,9 +125,7 @@ public class Game implements java.io.Serializable
 	public void act(int direction)
 	{
 		// Don't move if the game is already lost or quit
-		if(lost())
-			return;
-		
+
 		// If this is the game's first move, keep track of
 		// the starting time and activate the time limit
 		if(newGame)
