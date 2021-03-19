@@ -17,6 +17,9 @@ public class Main
 
 	public static void main(String[] args)
 	{
+
+		autoplayMode(new Game());
+
 		loadKeyMap();
 		
 		int input = -1;
@@ -492,6 +495,8 @@ public class Main
 
 	public static void autoplayMode(Game game)
 	{
+		AISolver.expectimaxAi(game);
+
 		System.out.println("Recursive, Circle, Corner, Random or expectimax? 1/2/3/4/5");
 		int input = getIntegerInput(1, 5, "Incorrect input. Enter 1, 2, 3 or 4 with no punctuation");
 

@@ -178,8 +178,13 @@ public class Grid implements Cloneable, java.io.Serializable {
 
     // Returns if the location is a valid position in the grid
     public boolean isValid(Location loc) {
-        return (loc.getRow() >= 0 && loc.getRow() < getNumRows() &&
-                loc.getCol() >= 0 && loc.getCol() < getNumCols());
+        if(loc == null)
+        {
+            var lort = 123;
+        }
+        var valid = (loc.getRow() >= 0 && loc.getRow() < getNumRows() && loc.getCol() >= 0 && loc.getCol() < getNumCols());
+
+        return valid;
     }
 
     /**
