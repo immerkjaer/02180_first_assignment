@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Grid implements Cloneable, java.io.Serializable {
     private static final long serialVersionUID = -5760271435893128475L;
-    private int[][] board;
+    public int[][] board;
     private boolean hideTileValues = false;
 
     /**
@@ -234,121 +234,6 @@ public class Grid implements Cloneable, java.io.Serializable {
         hideTileValues = enabled;
     }
 
-    public boolean rowIsFull(int rowNo) {
 
-        for (int col = 0; col < getNumCols(); col++) {
-            if (board[rowNo][col] == 0) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public int rowAlignments() {
-        int alignments = 0;
-        for (int col = 0; col < getNumCols(); col++) {
-            for (int row = 1; row < getNumRows(); row++) {
-                if (board[row-1][col] == board[row][col]) {
-                    alignments += board[row][col];
-                }
-            }
-        }
-        return alignments;
-    }
-
-    public int columnAlignments() {
-        int alignments = 0;
-        for (int row = 0; row < getNumRows(); row++) {
-            for (int col = 1; col < getNumCols(); col++) {
-                if (board[row][col - 1] == board[row][col]) {
-                    alignments += board[row][col];
-                }
-            }
-        }
-        return alignments;
-    }
-
-    public boolean rowIsSorted(int rowNo, boolean fromRightToLeft) {
-        if (fromRightToLeft) {
-            for (int col = getNumCols() - 2; col >= 0; col--) {
-                if (board[rowNo][col + 1] == 0) {
-                    //
-                } else if (board[rowNo][col] > board[rowNo][col + 1]) {
-                    return false;
-                }
-            }
-        } else {
-            for (int col = 1; col < getNumCols(); col++) {
-                if (board[rowNo][col - 1] == 0) {
-                    //
-                } else if (board[rowNo][col] < board[rowNo][col - 1]) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-
-
-    public double eval() {
-        List<Location> emptyLoc2 = getEmptyLocationsInRow(getNumRows()-3);
-        List<Location> emptyLoc3 = getEmptyLocationsInRow(getNumRows()-2);
-        List<Location> topRow1 = getEmptyLocationsInRow(0);
-        List<Location> topRow2 = getEmptyLocationsInRow(1);
-        if (rowIsFull(getNumRows()-1) && rowIsFull(getNumRows()-2)
-                && emptyLoc2.size() == 1 && topRow1.size() == 4) {
-            if (rowAlignments() == 0 && columnAlignments() == 0) {
-                ArrayList<Integer> neighbours = getNeighbours(emptyLoc2.get(0));
-                if (neighbours.contains(2) && neighbours.contains(4)) {
-                    return 0.0;
-                } else if (neighbours.contains(2)) {
-                    return 1.0/5.0 * (1-Game.CHANCE_OF_2);
-                } else if (neighbours.contains(4)) {
-                    return  1.0/5.0 * Game.CHANCE_OF_2;
-                } else {
-                    return 1.0/5.0;
-                }
-            }
-        } else if (rowIsFull(getNumRows()-1)
-                && emptyLoc3.size() == 1 && topRow1.size() == 4 && topRow2.size() == 4) {
-            if (rowAlignments() == 0 && columnAlignments() == 0) {
-                ArrayList<Integer> neighbours = getNeighbours(emptyLoc3.get(0));
-                if (neighbours.contains(2) && neighbours.contains(4)) {
-                    return 0.0;
-                } else if (neighbours.contains(2)) {
-                    return 1.0/9.0 * (1-Game.CHANCE_OF_2);
-                } else if (neighbours.contains(4)) {
-                    return  1.0/9.0 * Game.CHANCE_OF_2;
-                } else {
-                    return 1.0/9.0;
-                }
-            }
-        }
-        return 0.0;
-    }
-
-    public ArrayList<Integer> getNeighbours(Location loc) {
-        ArrayList<Integer> neighbours = new ArrayList<Integer>();
-        if (loc.getCol() == 0) {
-            neighbours.add(board[loc.getRow()][loc.getCol()+1]);
-        } else if (loc.getCol() == getNumCols()-1) {
-            neighbours.add(board[loc.getRow()][loc.getCol()-1]);
-        } else {
-            neighbours.add(board[loc.getRow()][loc.getCol()+1]);
-            neighbours.add(board[loc.getRow()][loc.getCol()-1]);
-        }
-        neighbours.add(board[loc.getRow()+1][loc.getCol()]);
-        return neighbours;
-    }
-
-    public List<Location> getEmptyLocationsInRow(int rowNo) {
-        LinkedList<Location> empty = new LinkedList<Location>();
-            for (int col = 0; col < getNumCols(); col++)
-                if (board[rowNo][col] == 0)
-                    empty.add(new Location(rowNo, col));
-        return empty;
-    }
 
 }

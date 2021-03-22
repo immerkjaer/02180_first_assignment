@@ -5,11 +5,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+
 public class Main
 {
 	// All methods can use the scanner without declaring it each time
 	private static Scanner scan = new Scanner (System.in);
-	
+
 	// Enter the character that the user entered
 	// Get the direction back that they want to move
 	// Currently only works for up,right,down,left
@@ -18,7 +19,7 @@ public class Main
 	public static void main(String[] args)
 	{
 		loadKeyMap();
-		
+
 		int input = -1;
 		do
 		{
@@ -71,33 +72,32 @@ public class Main
 
 			switch(input)
 			{
-			/*
-				case 1: practiceMode();
-						break;
-				case 2: normalMode();
-						break;
-				case 3: proMode();
-						break;
-				case 4: rushMode();
-						break;
-				case 5: survivalMode();
-						break;
-				case 6: XMode();
-						break;
-				case 7: cornerMode();
-						break;
-				case 8: speedMode();
-						break;
-				case 9: zenMode();
-						break;
-				case 10: crazyMode();
-						break;*/
-				case 11: customManualPlay();
-						break;
-				case 12: autoplayMode(new Game());
-						break;
-				case 13: customizeKeyMap();
-					break;
+			case 1: practiceMode();
+			break;
+			case 2: normalMode();
+			break;
+			case 3: proMode();
+			break;
+			case 4: rushMode();
+			break;
+			case 5: survivalMode();
+			break;
+			case 6: XMode();
+			break;
+			case 7: cornerMode();
+			break;
+			case 8: speedMode();
+			break;
+			case 9: zenMode();
+			break;
+			case 10: crazyMode();
+			break;
+			case 11: customManualPlay();
+			break;
+			case 12: autoplayMode(new Game());
+			break;
+			case 13: customizeKeyMap();
+			break;
 			}
 
 			System.out.println("Play again? y/n");
@@ -111,10 +111,10 @@ public class Main
 	public static void manualPlay(Game game)
 	{
 		String direction = "";
-		
+
 		// Used to prevent printing Congratulations every move after it is won
 		boolean winningGame = false;
-		
+
 		System.out.println(game);
 
 		while(!(game.lost() || direction.contains("auto")))
@@ -131,7 +131,7 @@ public class Main
 				// Remove Low Tiles
 				if(direction.contains("remove"))
 					game.removeLowTiles();
-				
+
 				// Hide Tile Values
 				else if(direction.contains("hide"))
 					game.hideTileValues(5);
@@ -147,63 +147,63 @@ public class Main
 				// Save Game
 				else if(direction.equals("save"))
 					try
-					{
+				{
 						System.out.println("Saving the game...");
 						Save.saveGame(game);
-					}
-					catch (IOException e) 
-					{
-						System.out.println("Error: Saved game can not be accessed");
-						e.printStackTrace();
-					}
-				
+				}
+				catch (IOException e) 
+				{
+					System.out.println("Error: Saved game can not be accessed");
+					e.printStackTrace();
+				}
+
 				// Load Game
 				else if(direction.equals("load"))
 					try
-					{
+				{
 						game = Save.loadGame();
-					}
-					catch(IOException e)
-					{
-						System.out.println("Error: Save file cannot be accessed");
-						e.printStackTrace();
-					}
-					catch (ClassNotFoundException e)
-					{
-						System.out.println("Error: Cannot read save file");
-						e.printStackTrace();
-					}
-					
+				}
+				catch(IOException e)
+				{
+					System.out.println("Error: Save file cannot be accessed");
+					e.printStackTrace();
+				}
+				catch (ClassNotFoundException e)
+				{
+					System.out.println("Error: Cannot read save file");
+					e.printStackTrace();
+				}
+
 
 				// Clear Save
 				else if(direction.equals("clear"))
 					try
-					{
+				{
 						System.out.println("Deleting the save...");
 						Save.clearSave();
-					}
-					catch (IOException e)
-					{
-						System.out.println("Error: Save file can not be accessed");
-						e.printStackTrace();
-					}
-				
+				}
+				catch (IOException e)
+				{
+					System.out.println("Error: Save file can not be accessed");
+					e.printStackTrace();
+				}
+
 				// Quit
 				else if(direction.charAt(0) == 'q')
 					game.quit();
-				
+
 				// If the game is moving up,right,down,or left
 				else if(keyMap.containsKey(direction.charAt(0)))
 				{
 					game.act(keyMap.get(direction.charAt(0)));
 				}
-				
-				
-				/*
+
+
+
 				// W or U to move up
 				else if(direction.charAt(0) == 'u' || direction.charAt(0) == 'w')
 					game.act(Location.UP);
-				
+
 				// R or D to move right
 				else if(direction.charAt(0) == 'r') // || direction.charAt(0) == 'd')
 					game.act(Location.RIGHT);
@@ -215,7 +215,7 @@ public class Main
 				// L or A to move left
 				else if(direction.charAt(0) == 'l' || direction.charAt(0) == 'a')
 					game.act(Location.LEFT);
-				*/
+
 
 				else
 				{
@@ -224,7 +224,7 @@ public class Main
 				}
 
 				System.out.println(game);
-				
+
 				// If the game is won
 				if(game.won() && winningGame == false)
 				{
@@ -236,7 +236,7 @@ public class Main
 		}
 
 		// When the game is over
-		
+
 		// Save the score if it is higher than the previous high score
 		try
 		{
@@ -251,7 +251,7 @@ public class Main
 			System.out.println("Error: High score save file cannot be accessed");
 			e.printStackTrace();
 		}
-		
+
 		// If no move has been made don't print the time played
 		if(game.timePlayed() != 0)
 		{
@@ -269,21 +269,7 @@ public class Main
 			System.out.println("Time Played: " + minutes + " minutes " + (seconds + milli) + " seconds");
 		}
 	}
-	
-	 //Expectimax
-		// Unlimited everything
-		public static void AImode()
-		{
-			Game game = new Game();
-			game.setMoveLimit(-1);
-			game.setUndoLimit(-1);
-			game.setTimeLimit(-1);
-			
-			manualPlay(game);
-		}
 
-	
-	
 	// Practice Mode
 	// Unlimited everything
 	public static void practiceMode()
@@ -292,10 +278,10 @@ public class Main
 		game.setMoveLimit(-1);
 		game.setUndoLimit(-1);
 		game.setTimeLimit(-1);
-		
+
 		manualPlay(game);
 	}
-	/*
+
 	// Normal Mode
 	// Unlimited moves and time
 	// 10 undos
@@ -376,7 +362,7 @@ public class Main
 
 		manualPlay(game);
 	}
-	
+
 	// Speed Mode
 	// Unlimited moves and time
 	// 10 undos
@@ -388,7 +374,7 @@ public class Main
 		game.setUndoLimit(-1);
 		game.setTimeLimit(-1);
 		game.speedMode(true);
-		
+
 		manualPlay(game);
 	}
 
@@ -405,7 +391,7 @@ public class Main
 
 		manualPlay(game);
 	}
-	
+
 	// Crazy Mode
 	// Unlimited moves and undos
 	// A 5x5 game with every other mode enabled (except zen)
@@ -423,8 +409,8 @@ public class Main
 
 		manualPlay(game);
 	}
-	*/
-	
+
+
 	//--------------------------------------------------------------------
 	// Customize Manual Play
 	// Can change the board size, Move Limit, Undo Limit, Time Limit,
@@ -433,31 +419,31 @@ public class Main
 	public static void customManualPlay()
 	{
 		int limit;
-		
+
 		System.out.println("Enter the number of rows. Recommended: 4");
 		int rows = 	getIntegerInput(1, 100, "Error: Enter a valid number of rows");
-		
+
 		System.out.println("Enter the number of columns. Recommended: 4");
 		int cols = 	getIntegerInput(1, 100, "Error: Enter a valid number of columns");
-		
+
 		Game game = new Game(rows,cols);
-		
+
 		// I don't know what this does but without it the program skips the next scan
 		scan.nextLine();
-		
+
 		System.out.println("Enter Move Limit (press enter for unlimited)");
 		limit = getLimitInput();
 		game.setMoveLimit(limit);
-		
+
 		System.out.println("Enter Undo Limit (press enter for unlimited)");
 		limit = getLimitInput();
 		game.setUndoLimit(limit);
-		
-		
+
+
 		System.out.println("Enter Time Limit In Seconds (press enter for unlimited)");
 		limit = getLimitInput();
 		game.setTimeLimit(limit);
-		
+
 		if(limit > 0)
 		{
 			// A game can only be in survival mode if it has a time limit
@@ -466,27 +452,27 @@ public class Main
 			if(! scan.nextLine().equals(""))
 				game.survivalMode();
 		}
-		
+
 		System.out.println("Corner Mode? (Immovable X's in corner)");
 		System.out.println("Press enter for no, anything else for yes");
 		if(! scan.nextLine().equals(""))
 			game.cornerMode();
-		
+
 		System.out.println("X Mode? (A movable X that cannot be combined)");
 		System.out.println("Press enter for no, anything else for yes");
 		if(! scan.nextLine().equals(""))
 			game.XMode();
-		
+
 		System.out.println("Rush Mode? (Higher value tiles can appear)");
 		System.out.println("Press enter for no, anything else for yes");
 		if(! scan.nextLine().equals(""))
 			game.dynamicTileSpawning(true);
-		
+
 		System.out.println("Speed Mode? (Tiles appear every 2 seconds)");
 		System.out.println("Press enter for no, anything else for yes");
 		if(! scan.nextLine().equals(""))
 			game.speedMode(true);
-		
+
 		manualPlay(game);
 	}
 
@@ -497,22 +483,31 @@ public class Main
 
 		switch(input)
 		{
-			case 5: Autoplay.expectimax(game);
-			/*
-			default:
-			{	
-				System.out.println("Developer Mode Enabled");
-				System.out.println("Testing the recursive play");
-				for(int i = 0; i < 100; i++)
-				{
-					Autoplay.recursivePlay(game.clone(), game.clone(), 2048, true);
-					System.out.println(Autoplay.getAutoMoveCount());
-					Autoplay.setAutoMoveCount(0);
-				}
-			}*/
+		case 1: recursiveHelper(game);
+		break;
+		case 2: Autoplay.circlePlay(game);
+		break;
+		case 3: Autoplay.cornerPlay(game);
+		break;
+		case 4: Autoplay.randomPlay(game);
+		break;
+
+		default:
+		{	
+			System.out.println("Developer Mode Enabled");
+			System.out.println("Testing the recursive play");
+			for(int i = 0; i < 100; i++)
+			{
+				Autoplay.recursivePlay(game.clone(), game.clone(), 2048, true);
+				System.out.println(Autoplay.getAutoMoveCount());
+				Autoplay.setAutoMoveCount(0);
+			}
+		}
 		}
 	}
-	
+
+
+
 	//---------------------------------------------------------
 	// Calls the recursive play method
 	//---------------------------------------------------------
@@ -520,20 +515,20 @@ public class Main
 	{
 		// Turn speed mode off because it interferes with autoplay
 		game.speedMode(false);
-		
+
 		System.out.println("Play until which tile is reached?");
 		System.out.println("(Values above 2048 are not recommended)");
 		int tile = getIntegerInput(0, 17000, "Error: Enter the target tile");
-		
+
 		Autoplay.recursivePlay(game, game, tile, true);
 		System.out.println("**** GAME WON ****");
 		System.out.println("Total Number of Moves: " + Autoplay.getAutoMoveCount());
 	}
-	
+
 	/**
 	 * Loads the saved HashMap that stores the controls
 	 * Assigns it to the global variable keyMap
-	 */
+	 */ 
 	private static void loadKeyMap()
 	{
 		try
@@ -554,7 +549,7 @@ public class Main
 			{
 				// Create the default key mapping
 				keyMap = new HashMap<Character, Integer>();
-				
+
 				keyMap.put('u', Location.UP);
 				keyMap.put('r', Location.RIGHT);
 				keyMap.put('d', Location.DOWN);
@@ -562,30 +557,30 @@ public class Main
 			}
 		}
 	}
-	
+
 	private static void customizeKeyMap()
 	{
 		char input;
-		
+
 		System.out.println("Customizing Input");
 		System.out.println("Type the key that you want to use");
-		
+
 		System.out.print("UP ");
 		input = scan.next().charAt(0);
 		keyMap.put(input, Location.UP);
-		
+
 		System.out.print("RIGHT ");
 		input = scan.next().charAt(0);
 		keyMap.put(input, Location.RIGHT);
-		
+
 		System.out.print("DOWN ");
 		input = scan.next().charAt(0);
 		keyMap.put(input, Location.DOWN);
-		
+
 		System.out.print("LEFT ");
 		input = scan.next().charAt(0);
 		keyMap.put(input, Location.LEFT);
-		
+
 		try
 		{
 			Save.saveKeyMap(keyMap);
@@ -596,20 +591,20 @@ public class Main
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Used to get input when choosing a number
 	 * @param minValue The lowest value that the input can have
 	 * @param maxValue The highest value that the input can have
 	 * @param errorMessage Printed when invalid input entered
 	 * @return A valid integer input
-	 */
+	 */ 
 	public static int getIntegerInput(int minValue, int maxValue, String errorMessage)
-	{
+	{ 
 		int input = 0;
 		boolean isInteger = false;
 		boolean isValid = false;
-		
+
 		// Error trapping
 		do
 		{
@@ -624,7 +619,7 @@ public class Main
 				scan.next();
 				isInteger = false;
 			}
-			
+
 			if(!isInteger || (input < minValue || input > maxValue))
 			{
 				isValid = false;
@@ -634,23 +629,23 @@ public class Main
 				isValid = true;
 
 		} while(!isValid);
-	
+
 		return input;	
-	}
-	
+	} 
+
 	/**
 	 * Used to get input for the time limit, undo limit, and time limit
 	 * Valid input is an integer 0 or greater or an empty string
 	 * @return The valid limit. (An integer -1 or greater)
-	 */
+	 */ 
 	public static int getLimitInput()
 	{
 		String limit;
-		
+
 		while(true)
 		{
 			limit = scan.nextLine();
-			
+
 			if(limit.equals(""))
 				return -1;
 			else
@@ -658,19 +653,19 @@ public class Main
 				try
 				{
 					int moveLimit = Integer.parseInt(limit);
-					
+
 					if(moveLimit >= 0)
 						return moveLimit;
 					else
 						System.out.println("Error: Enter a value 0 or greater");
-				
+
 				}
 				catch (Exception e)
 				{
 					System.out.println("Error: Enter a numerical value 0 or greater");
 					System.out.println("Press enter for unlimited");
 				}
-				
+
 			}
 		}
 	}
