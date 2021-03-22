@@ -283,7 +283,7 @@ public class AISolver
                 return decisionStats;
             }
             game.act(bestMove);
-            System.out.println(game);
+            game.printGame();
         }
 
         return decisionStats;

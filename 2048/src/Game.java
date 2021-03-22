@@ -825,7 +825,7 @@ public class Game implements java.io.Serializable
 	/**
 	 * Only used in the hideTileValues and speedMode methods to print the game
 	 */
-	private void printGame()
+	public void printGame()
 	{
 		System.out.println(toString());
 	}
@@ -842,29 +842,29 @@ public class Game implements java.io.Serializable
 	{
 		String output = "---------------------------------------------\n";
 		output += "||  Turn #" + turnNumber + "  Score: " + score + "\n";
-		output += "||  Moves Left:";
+//		output += "||  Moves Left:";
 		
-		if(movesRemaining >= 0)
-			output += movesRemaining;
-		else
-			output += "�";
+//		if(movesRemaining >= 0)
+//			output += movesRemaining;
+//		else
+//			output += "�";
+//
+//		output += " Undos Left:";
+//
+//		if(undosRemaining >= 0)
+//			output += undosRemaining;
+//		else
+//			output += "�";
+//
+//		output += " Time Left:";
+//
+//		if(timeLeft >= 0)
+//			output += timeLeft;
+//		else
+//			output += "�";
 		
-		output += " Undos Left:";
 		
-		if(undosRemaining >= 0)
-			output += undosRemaining;
-		else
-			output += "�";
-		
-		output += " Time Left:";
-		
-		if(timeLeft >= 0)
-			output += timeLeft;
-		else
-			output += "�";
-		
-		
-		output += "\n---------------------------------------------\n";
+		output += "---------------------------------------------\n";
 		output += board.toString();
 		
 		return output;
