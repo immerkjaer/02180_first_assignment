@@ -3,6 +3,7 @@ package src;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class Main
 {
@@ -14,8 +15,7 @@ public class Main
 	// Currently only works for up,right,down,left
 	private static HashMap<Character,Integer> keyMap = new HashMap<Character,Integer>();
 
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) throws InterruptedException, ExecutionException {
 
 		autoplayMode(new Game());
 
@@ -110,8 +110,7 @@ public class Main
 	//---------------------------------------------------------
 	// Manual Play
 	//---------------------------------------------------------
-	public static void manualPlay(Game game)
-	{
+	public static void manualPlay(Game game) throws InterruptedException, ExecutionException {
 		String direction = "";
 		
 		// Used to prevent printing Congratulations every move after it is won
@@ -274,8 +273,7 @@ public class Main
 	
 	 //Expectimax
 		// Unlimited everything
-		public static void AImode()
-		{
+		public static void AImode() throws InterruptedException, ExecutionException {
 			Game game = new Game();
 			game.setMoveLimit(-1);
 			game.setUndoLimit(-1);
@@ -288,8 +286,7 @@ public class Main
 	
 	// Practice Mode
 	// Unlimited everything
-	public static void practiceMode()
-	{
+	public static void practiceMode() throws InterruptedException, ExecutionException {
 		Game game = new Game();
 		game.setMoveLimit(-1);
 		game.setUndoLimit(-1);
@@ -432,8 +429,7 @@ public class Main
 	// Can change the board size, Move Limit, Undo Limit, Time Limit,
 	// Activate Corner Mode, XMode, and Survival Mode
 	//--------------------------------------------------------------------
-	public static void customManualPlay()
-	{
+	public static void customManualPlay() throws InterruptedException, ExecutionException {
 		int limit;
 		
 		System.out.println("Enter the number of rows. Recommended: 4");
@@ -492,15 +488,14 @@ public class Main
 		manualPlay(game);
 	}
 
-	public static void autoplayMode(Game game)
-	{
+	public static void autoplayMode(Game game) throws InterruptedException, ExecutionException {
 		ArrayList<LinkedList<AISolver.GameStats>> results = new ArrayList<>();
-		for (int i = 0; i <= 5; i++)
+		for (int i = 0; i <= 1; i++)
 		{
 			var stats = AISolver.expectimaxAi(new Game());
 			results.add(stats);
+			var hej = 123;
 		}
-
 
 		System.out.println("Recursive, Circle, Corner, Random or expectimax? 1/2/3/4/5");
 		int input = getIntegerInput(1, 5, "Incorrect input. Enter 1, 2, 3 or 4 with no punctuation");

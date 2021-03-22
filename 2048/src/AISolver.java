@@ -1,48 +1,135 @@
 package src;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 public class AISolver
 {
-    public static class ArrScore
+    public static class Pair
     {
-        private int smoothness;
-        private int monotonicity;
-        private int placement;
-        private int bonus;
-        private int possibleMerges;
+        private double p1;
+        private double p2;
 
-        public ArrScore(int smoothness, int monotonicity, int placement, int bonus, int possibleMerges)
+        public Pair(double p1, double p2)
         {
-            this.smoothness = smoothness;
-            this.monotonicity = monotonicity;
-            this.placement = placement;
-            this.bonus = bonus;
-            this.possibleMerges = possibleMerges;
+            this.p1 = p1;
+            this.p2 = p2;
+        }
+
+        double getFirst()
+        {
+            return this.p1;
+        }
+
+        double getSecond()
+        {
+            return this.p2;
+        }
+
+    }
+
+    public static class TilesInformation
+    {
+        private int[] tilesAsc;
+        private int[] tilesDesc;
+        private int maxValX;
+        private int maxValY;
+        private int tilesSet;
+        private HashMap<Integer, Integer> tileCounts;
+
+        public TilesInformation(
+                int[] tilesAsc,
+                int[] tilesDesc,
+                int maxValX,
+                int maxValY,
+                int tilesSet,
+                HashMap<Integer, Integer> tileCounts)
+        {
+            this.tilesAsc = tilesAsc;
+            this.tilesDesc = tilesDesc;
+            this.maxValX = maxValX;
+            this.maxValY = maxValY;
+            this.tilesSet = tilesSet;
+            this.tileCounts = tileCounts;
+        }
+    }
+
+    public static class GridScore
+    {
+        private double varianceScore;
+        private double monotonicityScore;
+        private double placementScore;
+        private double mergeScore;
+        private double groupSpread;
+
+        public GridScore(
+                double varianceScore,
+                double monotonicityScore,
+                double placementScore,
+                double mergeScore,
+                double groupSpread)
+        {
+            this.varianceScore = varianceScore;
+            this.monotonicityScore = monotonicityScore;
+            this.placementScore = placementScore;
+            this.mergeScore = mergeScore;
+            this.groupSpread = groupSpread;
         }
     }
 
     public static class FinalScore
     {
-        private int perfectStructureScore;
+        private int varianceScore;
         private int monoScore;
         private int placementScore;
-        private int mergeScore;
+        private int maxValScore;
         private int spaceScore;
-        private int skipped;
+        private int mergeScore;
+        private int groupSpreadScore;
+        private int statesDiscarded;
+        private int statesConsidered;
         private int totalScore;
 
-        public FinalScore(int perfectStructureScore, int monoScore, int placementScore, int mergeScore, int spaceScore, int skipped, int totalScore)
+        public FinalScore(
+                int varianceScore,
+                int monoScore,
+                int placementScore,
+                int maxValScore,
+                int spaceScore,
+                int mergeScore,
+                int groupSpreadScore,
+                int statesDiscarded,
+                int statesConsidered,
+                int totalScore)
         {
-            this.perfectStructureScore = perfectStructureScore;
+            this.varianceScore = varianceScore;
             this.monoScore = monoScore;
             this.placementScore = placementScore;
-            this.mergeScore = mergeScore;
+            this.maxValScore = maxValScore;
             this.spaceScore = spaceScore;
+            this.mergeScore = mergeScore;
+            this.groupSpreadScore = groupSpreadScore;
             this.totalScore = totalScore;
-            this.skipped = skipped;
+            this.statesDiscarded = statesDiscarded;
+            this.statesConsidered = statesConsidered;
+        }
+    }
+
+    public static class MoveToConsider
+    {
+        private FinalScore finalScore;
+        private int moveDir;
+        private int initialEmpty;
+
+        public MoveToConsider(
+                FinalScore finalScore,
+                int moveDir,
+                int initialEmpty)
+        {
+            this.finalScore = finalScore;
+            this.moveDir = moveDir;
+            this.initialEmpty = initialEmpty;
         }
     }
 
@@ -54,9 +141,19 @@ public class AISolver
         private Grid grid;
         private int move;
         private int score;
+        private ArrayList<MoveToConsider> otherOptions;
+        private int maxValue;
 
 
-        public GameStats(FinalScore finalScore, int turn, ArrayList<Integer> noGoMoves, Grid grid, int move, int score)
+        public GameStats(
+                FinalScore finalScore,
+                int turn,
+                ArrayList<Integer> noGoMoves,
+                Grid grid,
+                int move,
+                int score,
+                ArrayList<MoveToConsider> otherOptions,
+                int maxValue)
         {
             this.finalScore = finalScore;
             this.turn = turn;
@@ -64,24 +161,58 @@ public class AISolver
             this.grid = grid;
             this.move = move;
             this.score = score;
+            this.otherOptions = otherOptions;
+            this.maxValue = maxValue;
         }
     }
 
-    // virker som om, at vi løber tør for scoring, og så bliver bare lort til sisdt.
-    // tjek med endnu flere "sidste" states, og se hvor går galt
-    public static LinkedList<GameStats> expectimaxAi(Game game)
-    {
+    public static class runMove implements Callable<MoveToConsider> {
+
+        private Grid oldGrid;
+        private Grid newGrid;
+        private HelperFunctions hC;
+        private int depth;
+        private int moveDir;
+        private int emptyLocsForMove;
+
+        public runMove(
+                Grid newGrid,
+                Grid oldGrid,
+                HelperFunctions hC,
+                int depth,
+                int moveDir,
+                int emptyLocsForMove)
+        {
+            this.oldGrid = oldGrid;
+            this.newGrid = newGrid;
+            this.hC = hC;
+            this.depth = depth;
+            this.moveDir = moveDir;
+            this.emptyLocsForMove = emptyLocsForMove;
+        }
+
+        public MoveToConsider call()
+        {
+            var moveScore = getMoveScore(newGrid, oldGrid, hC, Integer.MAX_VALUE, depth);
+            return new MoveToConsider(moveScore, moveDir, emptyLocsForMove);
+        }
+    }
+
+    public static LinkedList<GameStats> expectimaxAi(Game game) throws InterruptedException, ExecutionException {
         var hC = new HelperFunctions();
         LinkedList<GameStats> decisionStats = new LinkedList<>();
 
-//        while (!(game.lost()) && game.getScore() < 100)
+        ExecutorService WORKER_THREAD_POOL = Executors.newFixedThreadPool(10);
+
         while (!(game.lost()))
         {
-            var score = Integer.MIN_VALUE;
+            long score = Integer.MIN_VALUE;
             var bestMove = Integer.MIN_VALUE;
             var depth = 3;
 
-            if (game.getGrid().getEmptyLocations().size() >= 5)
+            ArrayList<MoveToConsider> finalScores = new ArrayList<>();
+
+            if (game.getGrid().getEmptyLocations().size() >= 6)
             {
                 depth = 2;
             }
@@ -91,27 +222,56 @@ public class AISolver
             var noGoMoves = hC.IgnoreMoves(gridClone);
             FinalScore chosenMoveStats = null;
 
+            ArrayList<Callable<MoveToConsider>> callables = new ArrayList<>();
+
             for (var move : moves)
             {
-                var gridMoveClone = gridClone.clone();
-                var newGrid = hC.movePicesSomeDir(gridMoveClone, move);
-
                 if (noGoMoves.contains(move))
                 {
                     continue;
                 }
 
-                var moveScore = getMoveScore(newGrid, hC, move, depth);
+                var oldGrid = gridClone.clone();
+                var newGrid = hC.movePiecesSomeDir(oldGrid, move);
+                var emptyLocsForMove = newGrid.getEmptyLocations();
 
-                if (moveScore.totalScore > score)
+                callables.add( new runMove(newGrid, oldGrid, hC, depth, move, emptyLocsForMove.size()));
+
+
+//                var moveScore = getMoveScore(newGrid, gridClone, hC, Integer.MAX_VALUE, depth);
+//                statesConsidered.add(moveScore.statesConsidered);
+//                statesDiscarded.add(moveScore.statesDiscarded);
+//
+//                if (moveScore.statesConsidered == 0 || moveScore.statesDiscarded == 0)
+//                {
+//                    skipScoreScaling = true;
+//                }
+//
+//                finalScores.add( new MoveToConsider(moveScore, move, emptyLocsForMove.size()) );
+
+            }
+
+            List<Future<MoveToConsider>> futures = WORKER_THREAD_POOL.invokeAll(callables);
+            for (var res : futures)
+            {
+                var moveRes = res.get();
+                finalScores.add( moveRes );
+            }
+
+            for (var move : finalScores)
+            {
+                long scoreForMove = move.finalScore.totalScore;
+                scoreForMove = scoreForMove / move.initialEmpty;
+
+                if (scoreForMove > score)
                 {
-                    score = moveScore.totalScore;
-                    bestMove = move;
-                    chosenMoveStats = moveScore;
+                    score = scoreForMove;
+                    bestMove = move.moveDir;
+                    chosenMoveStats = move.finalScore;
                 }
             }
 
-            var stats = new GameStats(chosenMoveStats, game.getTurns(), noGoMoves, game.getGrid(), bestMove, game.getScore());
+            var stats = new GameStats(chosenMoveStats, game.getTurns(), noGoMoves, game.getGrid(), bestMove, game.getScore(), finalScores, game.highestPiece());
             decisionStats.addLast(stats);
             if (decisionStats.size() >= 30)
             {
@@ -130,26 +290,28 @@ public class AISolver
 
     }
 
-    public static FinalScore getMoveScore(Grid grid, HelperFunctions hC, int moveDir, int depth)
+    public static FinalScore getMoveScore(
+            Grid grid,
+            Grid previousGrid,
+            HelperFunctions hC,
+            int moveDir,
+            int depth)
     {
-//        if (grid.getEmptyLocations().size() <= 1)
-//        {
-//            new FinalScore(0,0,0,0, 0,0);
-//        }
-        // if not enough small values??
-
         if (depth == 0)
         {
-            return finaleScoring(grid, hC);
+            return finaleScoring(grid, previousGrid, moveDir, hC);
         }
 
         var score = 0;
-        var perfectStructureScore = 0;
+        var varianceScore = 0;
         var monoScore = 0;
         var placementScore = 0;
-        var mergeScore = 0;
+        var maxValScore = 0;
         var spaceScore = 0;
-        var skipped = 0;
+        var mergeScore = 0;
+        var groupSpreadScore = 0;
+        var statesDiscarded = 0;
+        var statesConsidered = 0;
 
         var emptyLocations = grid.getEmptyLocations();
         for (var emptyLoc : emptyLocations)
@@ -166,264 +328,458 @@ public class AISolver
             score += (gT2Score.totalScore * 0.9);
             score += (gT4Score.totalScore * 0.1);
 
-            perfectStructureScore += (int) ((gT2Score.perfectStructureScore * 0.9) + (gT4Score.perfectStructureScore * 0.1));
+            varianceScore += (int) ((gT2Score.varianceScore * 0.9) + (gT4Score.varianceScore * 0.1));
             monoScore += (int) ((gT2Score.monoScore * 0.9) + (gT4Score.monoScore * 0.1));
             placementScore += (int) ((gT2Score.placementScore * 0.9) + (gT4Score.placementScore * 0.1));
-            mergeScore += (int) ((gT2Score.mergeScore * 0.9) + (gT4Score.mergeScore * 0.1));
+            maxValScore += (int) ((gT2Score.maxValScore * 0.9) + (gT4Score.maxValScore * 0.1));
             spaceScore += (int) ((gT2Score.spaceScore * 0.9) + (gT4Score.spaceScore * 0.1));
-            skipped += (int) ((gT2Score.skipped * 0.9) + (gT4Score.skipped * 0.1));
+            statesDiscarded += ((gT2Score.statesDiscarded * 0.9) + (gT4Score.statesDiscarded * 0.1));
+            statesConsidered += ((gT2Score.statesConsidered * 0.9) + (gT4Score.statesConsidered * 0.1));
+            groupSpreadScore += ((gT2Score.groupSpreadScore * 0.9) + (gT4Score.groupSpreadScore * 0.1));
+            mergeScore += ((gT2Score.mergeScore * 0.9) + (gT4Score.mergeScore * 0.1));
         }
 
-        var fScore = score;
-
-        return new FinalScore(perfectStructureScore, monoScore, placementScore, mergeScore, spaceScore, skipped, fScore);
+        return new FinalScore(varianceScore, monoScore, placementScore, maxValScore, spaceScore, mergeScore, groupSpreadScore, statesDiscarded, statesConsidered, score);
     }
 
-    public static FinalScore calculateMoveScore(Grid grid, HelperFunctions hC, int depth)
+    public static FinalScore calculateMoveScore(
+            Grid grid,
+            HelperFunctions hC,
+            int depth)
     {
         var moves = hC.getMovesAsInts();
-        var noGoMoves = hC.IgnoreMoves(grid);
-        if (noGoMoves.size() >= 4 || grid.getEmptyLocations().size() <= 1)
-        {
-            return new FinalScore(0,0,0,0,0,1,0);
-        }
-
         var score = Integer.MIN_VALUE;
-        var perfectStructureScore = 0;
+        var varianceScore = 0;
         var monoScore = 0;
         var placementScore = 0;
-        var mergeScore = 0;
+        var maxValScore = 0;
         var spaceScore = 0;
+        var mergeScore = 0;
+        var groupSpreadScore = 0;
+        var statesDiscarded = 0;
+        var statesConsidered = 0;
 
         for (var move : moves)
         {
-            if (noGoMoves.contains(move))
-            {
-                continue;
-            }
-
             var gridSomeMove = grid.clone();
-            var newGrid = hC.movePicesSomeDir(gridSomeMove, move);
+            var newGrid = hC.movePiecesSomeDir(gridSomeMove, move);
 
-            var moveScore = getMoveScore(newGrid, hC, move, depth);
+            var moveScore = getMoveScore(newGrid, grid, hC, move, depth);
             if (moveScore.totalScore > score)
             {
                 score = moveScore.totalScore;
-                perfectStructureScore = moveScore.perfectStructureScore;
+                varianceScore = moveScore.varianceScore;
                 monoScore = moveScore.monoScore;
                 placementScore = moveScore.placementScore;
-                mergeScore = moveScore.mergeScore;
+                maxValScore = moveScore.maxValScore;
                 spaceScore = moveScore.spaceScore;
+                mergeScore = moveScore.mergeScore;
+                groupSpreadScore = moveScore.groupSpreadScore;
+            }
+            statesDiscarded += moveScore.statesDiscarded;
+            statesConsidered += moveScore.statesConsidered;
+        }
+        return new FinalScore(
+                varianceScore,
+                monoScore,
+                placementScore,
+                maxValScore,
+                spaceScore,
+                mergeScore,
+                groupSpreadScore,
+                statesDiscarded,
+                statesConsidered,
+                score);
+    }
+
+    public static FinalScore finaleScoring(
+            Grid grid,
+            Grid previousGrid,
+            int moveDir,
+            HelperFunctions hC)
+    {
+        var tilesInformation = getTilesInformation(grid.getArray());
+        var maxVal = tilesInformation.tilesDesc[0];
+
+        var scoreGrid = scoreBoard(grid, tilesInformation, hC);
+        var scoreVariance = scoreGrid.varianceScore;
+        var scorePlacement = scoreGrid.placementScore;
+        var scoreMerge = scoreGrid.mergeScore;
+        var scoreGroupSpread = scoreGrid.groupSpread;
+        var scoreMonotonicty = scoreGrid.monotonicityScore; // not actually scored
+        var emptySpaces = grid.getEmptyLocations().size();
+
+//        var sVari = 0.03 * (Math.log(maxVal) * scoreVariance);
+//        var sEmpty = 280 * Math.log(emptySpaces);
+//        var sPlace = 0.25 * (Math.log(maxVal) * scorePlacement);
+//        var sMerges = 15 * (Math.log(maxVal) * scoreMerge); // 10
+//        var sGroupSpread = 0.3 * (Math.log(maxVal) * scoreGroupSpread);
+//        var sMax = maxVal;
+        var sVari = 0.05 * scoreVariance;
+        var sEmpty = 30 * Math.log(emptySpaces);
+        var sPlace = 1.5 * scorePlacement; // * 1.7
+        var sMerges = 30 * scoreMerge; // 30
+        var sGroupSpread = 0.2 * scoreGroupSpread; // * 2
+        var sMax = 0; // 2 * maxVal;
+        var totalScore = sVari + sEmpty + sPlace + sMax + sMerges + sGroupSpread;
+
+        sVari = Math.round(sVari);
+        sEmpty = Math.round(sEmpty);
+        sPlace = Math.round(sPlace);
+        sMerges = Math.round(sMerges);
+        sGroupSpread = Math.round(sGroupSpread);
+        totalScore = Math.round(totalScore);
+
+        return new FinalScore(
+                (int) sVari,
+                0,
+                (int) sPlace,
+                sMax,
+                (int) sEmpty,
+                (int) sMerges,
+                (int) sGroupSpread,
+                0,
+                1,
+                (int) totalScore);
+    }
+
+    public static GridScore scoreBoard(
+            Grid grid,
+            TilesInformation tilesInformation,
+            HelperFunctions hC)
+    {
+        var gridArr = grid.getArray();
+        var gridArrTransposed = hC.transposeGridArray(grid.clone());
+
+        var length = gridArr.length-1;
+        var uniqueTilesAsc = tilesInformation.tilesAsc;
+        var uniqueTilesDesc = tilesInformation.tilesDesc;
+        var maxValX = tilesInformation.maxValX;
+        var maxValY = tilesInformation.maxValY;
+        var tilesSet = tilesInformation.tilesSet;
+        var tileCounts = tilesInformation.tileCounts;
+        var perfectStructureScaler = perfectStructure(gridArr, uniqueTilesDesc, length);
+        var varianceCutOf = uniqueTilesDesc[0];
+
+        double mergeScore = 0.0;
+        double placementScore = 0.0;
+        double varianceScore = 0.0;
+        double groupSpread = 0.0;
+
+        var rowLen = gridArr.length-1;
+        var colLen = gridArr[0].length-1;
+        for (int i = 0; i <= rowLen; i++)
+        {
+            for (int j = 0; j < colLen; j++)
+            {
+                var currentVal = gridArr[i][j];
+                var currentValTransposed = gridArrTransposed[i][j];
+                if (j < rowLen)
+                {
+                    var nextVal = gridArr[i][j+1];
+                    var nextValTransposed = gridArrTransposed[i][j+1];
+
+                    mergeScore += scoreMerging(currentVal, nextVal);
+                    mergeScore += scoreMerging(currentValTransposed, nextValTransposed);
+                }
+
+                placementScore += scorePlacement(currentVal, i, j, uniqueTilesDesc, uniqueTilesAsc, maxValX, maxValY, length, tilesSet, varianceCutOf);
+                var varianceAndGroupSpread = scoreVarianceAndGrouping(currentVal, i, j, gridArr, varianceCutOf, length, tileCounts);
+                varianceScore += varianceAndGroupSpread.getFirst();
+                groupSpread += varianceAndGroupSpread.getSecond();
 
             }
         }
-        return new FinalScore(perfectStructureScore, monoScore, placementScore, mergeScore, spaceScore, 0, score);
+
+        placementScore = placementScore * perfectStructureScaler;
+        return new GridScore(varianceScore, 0.0, placementScore, mergeScore, groupSpread);
     }
 
-    public static FinalScore finaleScoring(Grid grid, HelperFunctions hC)
+    public static Pair scoreVarianceAndGrouping(
+            int currentValue,
+            int i,
+            int j,
+            int[][] arr,
+            int varianceCutOf,
+            int length,
+            HashMap<Integer, Integer> tileCounts)
     {
-        if (grid.getEmptyLocations().size() <= 1)
+        double variance = 0.0;
+        double groupSpread = 0.0;
+
+        var c1 = (Math.log(currentValue) / Math.log(2));
+
+        for (var i2=0; i2<=length; i2++)
         {
-            return new FinalScore(0, 0, 0, 0, 0, 0, 0);
-        }
-
-        var gArr1 = grid.getArray();
-        var gArr2 = hC.transposeGridArray(grid);
-
-        var maxVal = hC.getHighestPiece(grid);
-
-        var gArr1Score = scoreGridArray(gArr1, maxVal, hC);
-        var gArr2Score = scoreGridArray(gArr2, maxVal, hC);
-
-        ArrayList<Integer> scoreList = new ArrayList<>();
-
-        var placementScore = scorePlacement(gArr1, maxVal);
-        var monoScore = 50 * placementScore * scoreMonotonicity(gArr1, maxVal, hC);
-
-        var mergeScore = 700 * (gArr1Score.possibleMerges + gArr2Score.possibleMerges);
-
-        scoreList.add(placementScore);
-        scoreList.add(monoScore);
-        scoreList.add(mergeScore);
-
-        Collections.sort(scoreList);
-
-        var spaceC = 300;
-        if (grid.getEmptyLocations().size() <= 2)
-        {
-            spaceC = 2000;
-            monoScore = monoScore / 10;
-            placementScore = placementScore / 10;
-        }
-        var spaceScore = spaceC * grid.getEmptyLocations().size();
-
-        var perfectStructureScore = perfectStructure(gArr1, hC) * 2000;
-
-        var totalScore = monoScore + mergeScore + spaceScore + perfectStructureScore;
-        var res = new FinalScore(perfectStructureScore, monoScore, placementScore, mergeScore, spaceScore, 0, totalScore);
-
-        if (grid.getEmptyLocations().size() <= 2 && detectClutter(grid.getArray()) && (gArr1Score.possibleMerges + gArr2Score.possibleMerges) <= 1)
-        {
-            return new FinalScore(0, 0, 0, 0, 0, 0, 0);
-        }
-        return res;
-    }
-
-    public static boolean detectClutter(int[][] arr)
-    {
-        var length = arr.length-1;
-        var bestScore = (arr.length-1)*(arr.length);
-        for (var i=0; i<=length-1; i++)
-        {
-            for (var j=0; j<=length-1; j++)
+            for (var j2=0; j2<=length; j2++)
             {
-                if (arr[i][j]<arr[i][j+1])
+                if (i == i2 && j == j2)
                 {
-                    bestScore--;
+                    continue;
+                }
+
+                // grouping
+                if (currentValue != 0 && currentValue == arr[i2][j2])
+                {
+                    var dist = manDist(i, j, i2, j2);
+                    if (dist != 1) // next to each other
+                    {
+                        groupSpread -= ((dist * tileCounts.get(currentValue)) / c1);
+                    }
+                }
+
+                // variance
+                if (currentValue == 0 || arr[i2][j2] == 0 || arr[i2][j2] > varianceCutOf || currentValue > varianceCutOf)
+                {
+                    continue;
+                }
+                var c2 = (Math.log(arr[i2][j2]) / Math.log(2));
+                if (c1 > c2)
+                {
+                    variance += (c2 - c1);
+                }
+                else if (c2 > c1)
+                {
+                    variance += (c1 - c2);
                 }
             }
         }
-        if (bestScore < 6)
-        {
-            return true;
-        }
-        return false;
+
+        return new Pair(variance, groupSpread);
     }
 
-    public static int perfectStructure(int[][] arr, HelperFunctions hC)
+    public static double scorePlacement(
+            int value,
+            int i,
+            int j,
+            int[] tilesDesc,
+            int[] tilesAsc,
+            int maxValX,
+            int maxValY,
+            int length,
+            int tilesSet,
+            int minValCutOf)
     {
-        var length = arr.length-1;
-        var uniqueSortedAsc = hC.getTilesAsc(arr);
-        var maxVal = uniqueSortedAsc[uniqueSortedAsc.length-1];
-        if (maxVal < 60)
+        var maxVal = tilesDesc[0];
+        if (maxVal < 128 || tilesDesc.length < 3)
         {
-            return 0;
+            return 0.0;
         }
 
-        var secondMaxVal = uniqueSortedAsc[uniqueSortedAsc.length-2];
-        var thirdMaxVal = uniqueSortedAsc[uniqueSortedAsc.length-3];
+        var secondMaxVal = tilesDesc[1];
+        var thirdMaxVal = tilesDesc[2];
 
-        var score = 0;
+        double placementSCore = 0.0;
+        double minPlacementScore = 0.0;
 
-        if (arr[0][0] == maxVal && arr[0][1] == secondMaxVal && arr[1][0] == secondMaxVal)
+        // minimize distance to corners for max value
+        if (value == maxVal)
         {
-            score = 10;
-        }
-        if (arr[length][0] == maxVal && arr[length][1] == secondMaxVal && arr[length-1][0] == secondMaxVal)
-        {
-            score = 10;
-        }
-        if (arr[0][0] == maxVal && (arr[0][1] == secondMaxVal || arr[1][0] == secondMaxVal))
-        {
-            score = 3;
-        }
-        if (arr[length][0] == maxVal && (arr[length][1] == secondMaxVal || arr[length-1][0] == secondMaxVal))
-        {
-            score = 3;
+            var leftCorner = (Math.min(manDist(0,0,i,j), manDist(length,0,i,j)));
+            var rightCorner = (Math.min(manDist(0,length,i,j), manDist(length,length,i,j)));
+
+            var c = (Math.log(maxVal) / Math.log(2));
+            var bestCorner = Math.min(leftCorner, rightCorner);
+
+            placementSCore -= (bestCorner * c);
+
+            return placementSCore;
         }
 
-        if (arr[0][0] == maxVal && (arr[0][1] == thirdMaxVal && arr[1][0] == secondMaxVal))
+        // minimize distance to corners for second max value (+ more)
+        if (value == secondMaxVal && secondMaxVal >= 64)
         {
-            score = 8;
-        }
-        if (arr[length][0] == maxVal && (arr[length][1] == secondMaxVal && arr[length-1][0] == thirdMaxVal))
-        {
-            score = 8;
+            var leftTopCorner = (Math.min(manDist(0,1,i,j), manDist(1,0,i,j)));
+            var leftBottomCorner = (Math.min(manDist(length,1,i,j), manDist(length-1,0,i,j)));
+            var rightTopCorner = (Math.min(manDist(0,length-1,i,j), manDist(1,length,i,j)));
+            var rightBottomCorner = (Math.min(manDist(length,length-1,i,j), manDist(length-1,length,i,j)));
+
+            var minLeft = Math.min(leftTopCorner, leftBottomCorner);
+            var minRight = Math.min(rightTopCorner, rightBottomCorner);
+
+            var c = (Math.log(secondMaxVal) / Math.log(2));
+            placementSCore -= ((Math.min(minLeft, minRight)) * c);
+
+            var distToMax = manDist(maxValX, maxValY, i, j);
+            placementSCore -= (distToMax * c);
+
+            return placementSCore;
         }
 
-        return score;
-    }
-
-    public static int scorePlacement(int[][] arr, int maxVal)
-    {
-        var placementSCore = 1;
-        var length = arr.length-1;
-        var lengthHalf = (arr.length / 2) - 1;
-        for (var i=0; i <= length; i++)
+        // minimize distance to corners for third max value (+ more)
+        if (value == thirdMaxVal && thirdMaxVal >= 32)
         {
-            for (var j=0; j <= lengthHalf; j++)
+            var leftTopCorner = (Math.min(manDist(0,1,i,j), manDist(1,0,i,j)));
+            var leftBottomCorner = (Math.min(manDist(length,1,i,j), manDist(length-1,0,i,j)));
+            var rightTopCorner = (Math.min(manDist(0,length-1,i,j), manDist(1,length,i,j)));
+            var rightBottomCorner = (Math.min(manDist(length,length-1,i,j), manDist(length-1,length,i,j)));
+
+            var minLeft = Math.min(leftTopCorner, leftBottomCorner);
+            var minRight = Math.min(rightTopCorner, rightBottomCorner);
+
+            var c = (Math.log(thirdMaxVal) / Math.log(2));
+            placementSCore -= ((Math.min(minLeft, minRight)) * c);
+
+            var distToMax = manDist(maxValX, maxValY, i, j);
+            placementSCore -= (distToMax * c);
+
+            return placementSCore;
+        }
+
+        // move small values away from max value
+        for (var minVal : tilesAsc)
+        {
+            var distToMax = 0;
+
+            if (value == minVal && minVal < minValCutOf)
             {
-                if (arr[i][j] == maxVal)
-                {
-                    placementSCore++;
-                }
+                var c = (Math.log(minValCutOf - minVal) / Math.log(2));
+                distToMax = manDist(maxValX, maxValY, i, j);
+                minPlacementScore += (distToMax * c);
+
+                return minPlacementScore / tilesSet;
             }
-        }
-        if (arr[0][0] == maxVal || arr[length][0] == maxVal)
-        {
-            placementSCore+=2;
         }
 
         return placementSCore;
     }
 
-    public static int scoreMonotonicity(int[][] arr, int maxVal, HelperFunctions hC)
+    public static double scoreMerging(
+            int v1,
+            int v2)
     {
-        var monotonicity = 0;
-
-        var length = arr.length-1;
-        var leftMostColDown = new int[length+1];
-        var leftMostColUp= new int[length+1];
-
-        for (var i=0; i <= length; i++)
+        if (v1 == v2 && v1 != 0)
         {
-            leftMostColDown[i] = arr[i][0];
-            leftMostColUp[i] = arr[length-i][0];
+            return (Math.log(v1) / Math.log(2));
         }
-
-        var leftMostUp = hC.isSortedAsc(leftMostColUp);
-        var leftMostDown = hC.isSortedAsc(leftMostColDown);
-        var bottomRight = hC.isSortedAsc(arr[length]);
-        var topRight = hC.isSortedAsc(arr[0]);
-
-        if ((leftMostUp && bottomRight) || (leftMostDown && topRight))
-        {
-            monotonicity=10;
-        }
-        if (leftMostUp || leftMostDown || bottomRight || topRight)
-        {
-            monotonicity=3;
-        }
-
-        return monotonicity;
+        return 0.0;
     }
 
-    public static ArrScore scoreGridArray(int[][] arr, int maxVal, HelperFunctions hC)
+    // perfect structure is when the biggest values are placed in corners
+    public static double perfectStructure(
+            int[][] arr,
+            int[] uniqueTilesDesc,
+            int length)
     {
-        var monotonicity = 0;
-        var bonus = 0;
-        var possibleMerges = 0;
-        var placement = 0;
-        var smoothness = 0;
+        ArrayList<Integer> secondAndThird = new ArrayList<>();
+        var maxVal = uniqueTilesDesc[0];
 
-        var length = arr.length-1;
-
-        for (int i = 0; i <= length; i++)
+        if (maxVal < 128)
         {
-            var variance = hC.getVariance(arr[i]);
-            smoothness += variance;
+            return 1.0;
+        }
 
-            for (int j = 0; j < arr[i].length-1; j++)
+        secondAndThird.add(uniqueTilesDesc[1]);
+        secondAndThird.add(uniqueTilesDesc[0]);
+
+        double score = 1.0;
+
+        if (arr[0][0] == maxVal && secondAndThird.contains(arr[0][1]) && secondAndThird.contains(arr[1][0]))
+        {
+            score = 0.6;
+        }
+        if (arr[length][0] == maxVal && secondAndThird.contains(arr[length][1]) && secondAndThird.contains(arr[length-1][0]))
+        {
+            score = 0.6;
+        }
+        if (arr[0][length] == maxVal && secondAndThird.contains(arr[0][length-1]) && secondAndThird.contains(arr[1][length]))
+        {
+            score = 0.6;
+        }
+        if (arr[length][length] == maxVal && secondAndThird.contains(arr[length][length-1]) && secondAndThird.contains(arr[length-1][length]))
+        {
+            score = 0.6;
+        }
+
+        return score;
+    }
+
+    // manhatten distance
+    public static int manDist(int x1, int y1, int x2, int y2)
+    {
+        return Math.abs(x1-x2) + Math.abs(y1-y2);
+    }
+
+    // useful information about current grid
+    public static TilesInformation getTilesInformation(int[][] arr)
+    {
+        ArrayList<Integer> unique = new ArrayList<>();
+        HashMap<Integer, Integer> tileCounts = new HashMap<>();
+        int currentMaxVal = Integer.MIN_VALUE;
+        int maxValueX = Integer.MIN_VALUE;
+        int maxValueY = Integer.MIN_VALUE;
+        int tilesSet = 0;
+
+        for (var i=0; i<= arr.length-1; i++)
+        {
+            for (var j=0; j<= arr.length-1; j++)
             {
-                if (arr[i][j] == arr[i][j+1] && arr[i][j] != 0)
+                var currentValue = arr[i][j];
+                if (!unique.contains(currentValue) && currentValue != 0)
                 {
-                    possibleMerges++;
-//                    possibleMerges += arr[i][j];
+                    unique.add(currentValue);
                 }
-                if (arr[i][j] == arr[i][j+1] && arr[i][j] == maxVal && arr[i][j] != 0)
+                if (currentValue > currentMaxVal)
                 {
-                    possibleMerges+=10;
-//                    possibleMerges += (arr[i][j]*10);
+                    currentMaxVal = currentValue;
+                    maxValueX = i;
+                    maxValueY = j;
+                }
+                if (currentValue != 0)
+                {
+                    tilesSet++;
+                }
+
+                if (tileCounts.containsKey(currentValue))
+                {
+                    tileCounts.put(currentValue, tileCounts.get(currentValue) + 1);
+                }
+                else
+                {
+                    tileCounts.put(currentValue, 1);
                 }
             }
         }
-        if (arr[0][0] == maxVal || arr[length][0] == maxVal)
-        {
-            bonus = 2;
-            placement = 10;
-        }
-        var arrScore = new ArrScore(smoothness, monotonicity, placement, bonus, possibleMerges);
-        return arrScore;
+
+        var uniqueTilesAsc = unique.stream().sorted().mapToInt(x -> x).toArray();
+        var uniqueTilesDesc = unique.stream().sorted(Collections.reverseOrder()).mapToInt(Integer::intValue).toArray();
+
+        return new TilesInformation(uniqueTilesAsc, uniqueTilesDesc, maxValueX, maxValueY, tilesSet, tileCounts);
     }
 
 }
+
+
+//
+//    public static int scoreMonotonicity(int[][] arr)
+//    {
+//        var len = arr.length-1;
+//
+//        var firstDir = 0;
+//        var secondDir = 0;
+//
+//        for (var i=0; i<=len; i++)
+//            for (var j=0; j<=len-1; j++)
+//            {
+//                if (arr[i][j] == 0 || arr[i][j+1] == 0)
+//                {
+//                    continue;
+//                }
+//                var c1 = (Math.log(arr[i][j]) / Math.log(2));
+//                var c2 = (Math.log(arr[i][j+1]) / Math.log(2));
+//
+//                if (c1 >= c2)
+//                {
+//                    secondDir += (c1 - c2);
+//                }
+//                else if (c2 >= c1)
+//                {
+//                    firstDir += (c2 - c1);
+//                }
+//            }
+//
+//        return Math.max(secondDir, firstDir);
+//    }
+
+
+
