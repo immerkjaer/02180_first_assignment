@@ -1,4 +1,7 @@
-package src;
+package AI;
+
+import src.Grid;
+import src.Location;
 
 import java.util.ArrayList;
 import java.util.Arrays;

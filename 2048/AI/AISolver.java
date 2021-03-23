@@ -1,8 +1,11 @@
-package src;
+package AI;
+
+import AI.HelperFunctions;
+import src.Game;
+import src.Grid;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 public class AISolver
 {
@@ -417,15 +420,16 @@ public class AISolver
 //        var sMax = maxVal;
         var sVari = 0.05 * scoreVariance;
         var sEmpty = 30 * Math.log(emptySpaces);
-        var sPlace = 1.5 * scorePlacement; // * 1.7
-        var sMerges = 30 * scoreMerge; // 30
-        var sGroupSpread = 0.2 * scoreGroupSpread; // * 2
-        var sMax = 0; // 2 * maxVal;
+        var sPlace = 1.45 * scorePlacement; // * 1.5
+        var sMerges = 20 * scoreMerge; // 30
+        var sGroupSpread = 0.80 * scoreGroupSpread; // * 0.65
+        var sMax = Math.log(maxVal) / Math.log(2); // 0
         var totalScore = sVari + sEmpty + sPlace + sMax + sMerges + sGroupSpread;
 
         sVari = Math.round(sVari);
         sEmpty = Math.round(sEmpty);
         sPlace = Math.round(sPlace);
+        sMax = Math.round(sMax);
         sMerges = Math.round(sMerges);
         sGroupSpread = Math.round(sGroupSpread);
         totalScore = Math.round(totalScore);
@@ -434,7 +438,7 @@ public class AISolver
                 (int) sVari,
                 0,
                 (int) sPlace,
-                sMax,
+                (int) sMax,
                 (int) sEmpty,
                 (int) sMerges,
                 (int) sGroupSpread,
