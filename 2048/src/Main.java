@@ -1,7 +1,12 @@
 package src;
 
+import AI.AISolver;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -16,8 +21,10 @@ public class Main
 	// Currently only works for up,right,down,left
 	private static HashMap<Character,Integer> keyMap = new HashMap<Character,Integer>();
 
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) throws InterruptedException, ExecutionException {
+
+		autoplayMode(new Game());
+
 		loadKeyMap();
 
 		int input = -1;
@@ -108,8 +115,7 @@ public class Main
 	//---------------------------------------------------------
 	// Manual Play
 	//---------------------------------------------------------
-	public static void manualPlay(Game game)
-	{
+	public static void manualPlay(Game game) throws InterruptedException, ExecutionException {
 		String direction = "";
 
 		// Used to prevent printing Congratulations every move after it is won
@@ -269,11 +275,21 @@ public class Main
 			System.out.println("Time Played: " + minutes + " minutes " + (seconds + milli) + " seconds");
 		}
 	}
+	
+	 //Expectimax
+		// Unlimited everything
+		public static void AImode() throws InterruptedException, ExecutionException {
+			Game game = new Game();
+			game.setMoveLimit(-1);
+			game.setUndoLimit(-1);
+			game.setTimeLimit(-1);
+			
+			manualPlay(game);
+		}
 
 	// Practice Mode
 	// Unlimited everything
-	public static void practiceMode()
-	{
+	public static void practiceMode() throws InterruptedException, ExecutionException {
 		Game game = new Game();
 		game.setMoveLimit(-1);
 		game.setUndoLimit(-1);
@@ -285,8 +301,7 @@ public class Main
 	// Normal Mode
 	// Unlimited moves and time
 	// 10 undos
-	public static void normalMode()
-	{
+	public static void normalMode() throws ExecutionException, InterruptedException {
 		Game game = new Game();
 		game.setMoveLimit(-1);
 		game.setUndoLimit(10);
@@ -298,8 +313,7 @@ public class Main
 	// Pro Mode
 	// Unlimited moves and time
 	// No undos
-	public static void proMode()
-	{
+	public static void proMode() throws ExecutionException, InterruptedException {
 		Game game = new Game();
 		game.setMoveLimit(-1);
 		game.setUndoLimit(0);
@@ -310,8 +324,7 @@ public class Main
 
 	// Rush Mode
 	// Higher value tiles spawn
-	public static void rushMode()
-	{
+	public static void rushMode() throws ExecutionException, InterruptedException {
 		Game game = new Game();
 		game.dynamicTileSpawning(true);
 
@@ -322,8 +335,7 @@ public class Main
 	// Survival Mode
 	// Unlimited moves and undos
 	// Only 30 seconds to play. The time increases when tiles >= 8 combine
-	public static void survivalMode()
-	{
+	public static void survivalMode() throws ExecutionException, InterruptedException {
 		Game game = new Game();
 		game.setMoveLimit(-1);
 		game.setUndoLimit(-1);
@@ -337,8 +349,7 @@ public class Main
 	// Unlimited moves and time
 	// 10 undos
 	// Places an X on the board that can move but not combine 
-	public static void XMode()
-	{
+	public static void XMode() throws ExecutionException, InterruptedException {
 		Game game = new Game();
 		game.setMoveLimit(-1);
 		game.setUndoLimit(10);
@@ -352,8 +363,7 @@ public class Main
 	// Unlimited moves and time
 	// 10 undos
 	// Places immovable pieces in the corners of the board
-	public static void cornerMode()
-	{
+	public static void cornerMode() throws ExecutionException, InterruptedException {
 		Game game = new Game();
 		game.setMoveLimit(-1);
 		game.setUndoLimit(10);
@@ -367,8 +377,7 @@ public class Main
 	// Unlimited moves and time
 	// 10 undos
 	// Tiles appear every every 2 seconds even if no move was made
-	public static void speedMode()
-	{
+	public static void speedMode() throws ExecutionException, InterruptedException {
 		Game game = new Game();
 		game.setMoveLimit(-1);
 		game.setUndoLimit(-1);
@@ -381,8 +390,7 @@ public class Main
 	// Zen Mode
 	// Unlimited moves, undos and time
 	// Every piece can combine
-	public static void zenMode()
-	{
+	public static void zenMode() throws ExecutionException, InterruptedException {
 		Game game = new Game();
 		game.setMoveLimit(-1);
 		game.setUndoLimit(-1);
@@ -395,8 +403,7 @@ public class Main
 	// Crazy Mode
 	// Unlimited moves and undos
 	// A 5x5 game with every other mode enabled (except zen)
-	public static void crazyMode()
-	{
+	public static void crazyMode() throws ExecutionException, InterruptedException {
 		Game game = new Game(5,5);
 		game.setMoveLimit(-1);
 		game.setUndoLimit(-1);
@@ -416,8 +423,7 @@ public class Main
 	// Can change the board size, Move Limit, Undo Limit, Time Limit,
 	// Activate Corner Mode, XMode, and Survival Mode
 	//--------------------------------------------------------------------
-	public static void customManualPlay()
-	{
+	public static void customManualPlay() throws InterruptedException, ExecutionException {
 		int limit;
 
 		System.out.println("Enter the number of rows. Recommended: 4");
@@ -476,8 +482,15 @@ public class Main
 		manualPlay(game);
 	}
 
-	public static void autoplayMode(Game game)
-	{
+	public static void autoplayMode(Game game) throws InterruptedException, ExecutionException {
+//		ArrayList<LinkedList<AISolver.GameStats>> results = new ArrayList<>();
+//		for (int i = 0; i <= 1; i++)
+//		{
+//			var stats = AISolver.expectimaxAi(new Game());
+//			results.add(stats);
+//			var hej = 123;
+//		}
+
 		System.out.println("Recursive, Circle, Corner, Random or expectimax? 1/2/3/4/5");
 		int input = getIntegerInput(1, 5, "Incorrect input. Enter 1, 2, 3 or 4 with no punctuation");
 
