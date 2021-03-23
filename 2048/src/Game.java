@@ -6,7 +6,7 @@ public class Game implements java.io.Serializable
 	private static final long serialVersionUID = 3356339029021499348L;
 
 	// The main board the game is played on
-	private Grid board;
+	public Grid board;
 	
 	// Stores the previous boards and scores
 	private Stack history;
@@ -97,25 +97,7 @@ public class Game implements java.io.Serializable
 		
 	}
 
-	public void act2(int direction)
-	{
-		//Grid lastBoard = this.board.clone();
-		Grid board = this.board.clone();
-
-		List<Location> locations = board.getLocationsInTraverseOrder(direction);
-
-
-		for(Location loc : locations)
-			move2(board, loc, direction);
-
-
-		//int sc1 = board.getEmptyLocations().size();
-		//int sc = score;
-
-		//return sc1 ;
-
-	}
-
+		
 
 	
 	/**
@@ -187,35 +169,7 @@ public class Game implements java.io.Serializable
 		}
 	}
 
-	private void move2(Grid board, Location from, int direction)
-	{
-		// Do not move X spaces or 0 spaces
-		if(board.get(from) != -1 && board.get(from) != 0)
-		{
-			Location to = from.getAdjacent(direction);
-			while(board.isValid(to))
-			{
-				// If the new position is empty, move
-				if(board.isEmpty(to))
-				{
-					board.move(from, to);
-					from = to.clone();
-					to = to.getAdjacent(direction);
-				}
 
-				// If the new position has a piece
-				else
-				{
-					// If they have the same value or if zenMode is enabled, combine
-					if(board.get(from) == board.get(to) || zenMode)
-						add(from, to);
-
-					return;
-				}
-			}
-		}
-	}
-	
 	
 	/**
 	 * Adds piece "from" into piece "to", 4 4 -> 0 8
@@ -223,7 +177,7 @@ public class Game implements java.io.Serializable
 	 * @param from The piece to move
 	 * @param to The destination of the piece
 	*/
-	private void add(Location from, Location to)
+	public void add(Location from, Location to)
 	{
 		if(survivalMode && board.get(from) >= 8)
 			timeLeft += board.get(from) / 4;
