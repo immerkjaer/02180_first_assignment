@@ -637,7 +637,7 @@ public class AISolver
 
             if (value == minVal && minVal < minValCutOf)
             {
-                var c = (Math.log(minValCutOf - minVal) / Math.log(2));
+                var c = (Math.log(minValCutOf - minVal) / Math.log(2)) / 10;
                 distToMax = manDist(maxValX, maxValY, i, j);
                 minPlacementScore += (distToMax * c);
 
