@@ -421,8 +421,8 @@ public class AISolver
         var sVari = 0.05 * scoreVariance;
         var sEmpty = 30 * Math.log(emptySpaces);
         var sPlace = 1.45 * scorePlacement; // * 1.5
-        var sMerges = 20 * scoreMerge; // 30
-        var sGroupSpread = 0.80 * scoreGroupSpread; // * 0.65
+        var sMerges = 20 * scoreMerge; // (15 * scoreMerge * Math.log(emptySpaces)); // 30
+        var sGroupSpread = 0.55 * scoreGroupSpread; // * 0.65
         var sMax = Math.log(maxVal) / Math.log(2); // 0
         var totalScore = sVari + sEmpty + sPlace + sMax + sMerges + sGroupSpread;
 
