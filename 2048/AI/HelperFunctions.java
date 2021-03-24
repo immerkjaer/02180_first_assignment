@@ -5,7 +5,6 @@ import src.Location;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -25,10 +24,10 @@ public class HelperFunctions {
     {
         ArrayList<Integer> noGoMoves = new ArrayList<>();
 
-        var upCopy = grid.clone();
-        var DownCopy = grid.clone();
-        var RightCopy = grid.clone();
-        var LeftCopy = grid.clone();
+        Grid upCopy = grid.clone();
+        Grid DownCopy = grid.clone();
+        Grid RightCopy = grid.clone();
+        Grid LeftCopy = grid.clone();
 
         upCopy = movePiecesSomeDir(upCopy, 0);
         DownCopy = movePiecesSomeDir(DownCopy, 2);
@@ -60,9 +59,9 @@ public class HelperFunctions {
 
     public int[][] transposeGridArray(Grid grid)
     {
-        var gridCopy = grid.clone().getArray();
-        var rowsL = gridCopy[0].length;
-        var colsL = gridCopy.length;
+        int[][] gridCopy = grid.clone().getArray();
+        int rowsL = gridCopy[0].length;
+        int colsL = gridCopy.length;
         int[][] transposed = new int[colsL][rowsL];
 
         for (int i = 0; i < rowsL; i++)
@@ -121,7 +120,7 @@ public class HelperFunctions {
             return false;
         }
 
-        var sorted = IntStream.range(0, array.length - 1).noneMatch(i -> array[i] < array[i + 1]);
+        boolean sorted = IntStream.range(0, array.length - 1).noneMatch(i -> array[i] < array[i + 1]);
         if (sorted && array[1] == 0)
         {
             return false;
