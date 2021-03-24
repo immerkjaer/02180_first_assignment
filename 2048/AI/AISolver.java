@@ -10,11 +10,12 @@ import java.util.concurrent.*;
 public class AISolver
 {
 
-    public static LinkedList<GameStats> expectimaxAi(Game game) throws InterruptedException, ExecutionException {
+    public static LinkedList<GameStats> expectimaxAI(Game game) throws InterruptedException, ExecutionException {
         HelperFunctions hC = new HelperFunctions();
         LinkedList<GameStats> decisionStats = new LinkedList<>();
 
         ExecutorService WORKER_THREAD_POOL = Executors.newFixedThreadPool(10);
+
 
         while (!(game.lost()))
         {
