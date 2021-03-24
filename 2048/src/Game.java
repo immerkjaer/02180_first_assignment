@@ -796,28 +796,6 @@ public class Game implements java.io.Serializable
 	{
 		String output = "---------------------------------------------\n";
 		output += "||  Turn #" + turnNumber + "  Score: " + score + "\n";
-//		output += "||  Moves Left:";
-		
-//		if(movesRemaining >= 0)
-//			output += movesRemaining;
-//		else
-//			output += "�";
-//
-//		output += " Undos Left:";
-//
-//		if(undosRemaining >= 0)
-//			output += undosRemaining;
-//		else
-//			output += "�";
-//
-//		output += " Time Left:";
-//
-//		if(timeLeft >= 0)
-//			output += timeLeft;
-//		else
-//			output += "�";
-		
-		
 		output += "---------------------------------------------\n";
 		output += board.toString();
 		
