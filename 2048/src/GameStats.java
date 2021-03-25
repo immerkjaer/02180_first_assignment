@@ -1,6 +1,6 @@
-package AI;
+package src;
 
-import src.Grid;
+import game.Grid;
 
 import java.util.ArrayList;
 

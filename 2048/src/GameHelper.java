@@ -1,12 +1,12 @@
-package AI;
+package src;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import src.Game;
-import src.Location;
-import src.Grid;
+import game.Game;
+import game.Location;
+import game.Grid;
 
 public class GameHelper {
 	

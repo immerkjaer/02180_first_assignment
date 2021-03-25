@@ -1,10 +1,10 @@
-package AI;
+package src;
 
 import java.util.ArrayList;
 
-import src.Game;
-import src.Grid;
-import src.Location;
+import game.Game;
+import game.Grid;
+import game.Location;
 
 public class Autoplayer {
 	

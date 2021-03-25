@@ -1,4 +1,4 @@
-package AI;
+package src;
 
 public class Pair
 {

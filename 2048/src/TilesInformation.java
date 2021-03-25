@@ -1,4 +1,4 @@
-package AI;
+package src;
 
 import java.util.HashMap;
 
