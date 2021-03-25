@@ -1,8 +1,27 @@
-cross-validation:
-	for v1 in 1 2 3 4 ; do \
-		for v2 in 5 6 ; do \
-			for v3 in 7 8 ; do \
-				echo $$v1 $$v2 $$v3 ; \
+clean:
+	rm -rf classes/*
+	rm -rf dumps
+
+compile-game-files:
+	javac -d "classes" -sourcepath 2048/ 2048/game/Game.java
+	
+compile-solver: compile-game-files
+	javac -d "classes" -classpath "classes" -sourcepath 2048/ 2048/src/Main.java
+
+cross-validation: clean compile-solver
+	mkdir -p dumps
+	touch dumps/validation.txt
+	for vC in 0.02 0.035 0.1 ; do \
+		for pC in 0.9 1.3 2.0 ; do \
+			for gsC in 0.3 0.5 1.0 ; do \
+				echo $$vC $$pC $$gsC ; \
+				java -classpath "classes" src/Main \
+					-vari $$vC \
+					-place $$pC \
+					-groupspread $$gsC \
+					-empty 30 \
+					-merge 7.5 \
+					>> dumps/validation.txt ; \
    			done \
 		done \
 	done
