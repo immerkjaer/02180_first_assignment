@@ -8,10 +8,10 @@ public class Main {
 	{
 		try
 		{
-			double variC = 0.05;
+			double variC = 0.035;
 			double emptyC = 30;
-			double placeC = 1.45;
-			double mergeC = 20;
+			double placeC = 0.8;
+			double mergeC = 7.5;
 			double groupspreadC = 0.55;
 
 			if (args.length == 0)
