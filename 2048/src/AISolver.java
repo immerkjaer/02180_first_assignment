@@ -1,14 +1,36 @@
-package AI;
+package src;
 
-import src.Game;
-import src.Grid;
-import src.Location;
+import game.Game;
+import game.Grid;
+import game.Location;
 
 import java.util.*;
 import java.util.concurrent.*;
 
 public class AISolver
 {
+    private static double variC;
+    private static double emptyC;
+    private static double placeC;
+    private static double mergeC;
+    private static double groupspreadC;
+    private static boolean isCrossValidation;
+
+    public AISolver(
+            double variC,
+            double placeC,
+            double groupspreadC,
+            double emptyC,
+            double mergeC,
+            boolean isCrossValidation)
+    {
+        AISolver.variC = variC;
+        AISolver.emptyC = emptyC;
+        AISolver.placeC = placeC;
+        AISolver.mergeC = mergeC;
+        AISolver.groupspreadC = groupspreadC;
+        AISolver.isCrossValidation = isCrossValidation;
+    }
 
     public static LinkedList<GameStats> expectimaxAI(Game game) throws InterruptedException, ExecutionException {
         HelperFunctions hC = new HelperFunctions();
@@ -63,7 +85,7 @@ public class AISolver
             for (MoveToConsider move : finalScores)
             {
                 long scoreForMove = move.getFinalScore().getTotalScore();
-                scoreForMove = scoreForMove / move.getInitialEmpty();
+//                scoreForMove = scoreForMove / move.getInitialEmpty();
 
                 if (scoreForMove > score)
                 {
@@ -80,19 +102,19 @@ public class AISolver
                 decisionStats.removeFirst();
             }
 
-            if(game.lost())
-            {
-                return decisionStats;
-            }
             game.act(bestMove);
-            game.printGame();
+            if (!isCrossValidation)
+                game.printGame();
         }
 
+        if(isCrossValidation)
+        {
+            printTuningConstants();
+            game.printGame();
+        }
         return decisionStats;
 
     }
-
-
 
     public static FinalScore getMoveScore(
             Grid grid,
@@ -208,12 +230,12 @@ public class AISolver
         double scoreGroupSpread = scoreGrid.getGroupSpread();
         int emptySpaces = grid.getEmptyLocations().size();
 
-        double sVari = 0.05 * scoreVariance;
-        double sEmpty = 30 * Math.log(emptySpaces);
-        double sPlace = 1.45 * scorePlacement; // * 1.5
-        double sMerges = 20 * scoreMerge; // (15 * scoreMerge * Math.log(emptySpaces)); // 30
-        double sGroupSpread = 0.55 * scoreGroupSpread; // * 0.65
-        double sMax = Math.log(maxVal) / Math.log(2); // 0
+        double sVari = variC * scoreVariance;
+        double sEmpty = emptyC * Math.log(emptySpaces);
+        double sPlace = placeC * scorePlacement;
+        double sMerges = mergeC * scoreMerge;
+        double sGroupSpread = groupspreadC * scoreGroupSpread;
+        double sMax = Math.log(maxVal) / Math.log(2);
         double totalScore = sVari + sEmpty + sPlace + sMax + sMerges + sGroupSpread;
 
         sVari = Math.round(sVari);
@@ -276,7 +298,7 @@ public class AISolver
                     mergeScore += scoreMerging(currentValTransposed, nextValTransposed);
                 }
 
-                placementScore += scorePlacement(currentVal, i, j, uniqueTilesDesc, uniqueTilesAsc, maxValX, maxValY, length, tilesSet, varianceCutOf);
+                placementScore += scorePlacement(currentVal, i, j, uniqueTilesDesc, uniqueTilesAsc, maxValX, maxValY, length, tilesSet, varianceCutOf, tileCounts);
                 Pair varianceAndGroupSpread = scoreVarianceAndGrouping(currentVal, i, j, gridArr, varianceCutOf, length, tileCounts);
                 varianceScore += varianceAndGroupSpread.getFirst();
                 groupSpread += varianceAndGroupSpread.getSecond();
@@ -317,7 +339,7 @@ public class AISolver
                     int dist = manDist(i, j, i2, j2);
                     if (dist != 1) // next to each other
                     {
-                        groupSpread -= ((dist * tileCounts.get(currentValue)) / c1);
+                        groupSpread -= (dist / c1);
                     }
                 }
 
@@ -351,7 +373,8 @@ public class AISolver
             int maxValY,
             int length,
             int tilesSet,
-            int minValCutOf)
+            int minValCutOf,
+            HashMap<Integer, Integer> tileCounts)
     {
         int maxVal = tilesDesc[0];
         if (maxVal < 128 || tilesDesc.length < 3)
@@ -371,7 +394,7 @@ public class AISolver
             int leftCorner = (Math.min(manDist(0,0,i,j), manDist(length,0,i,j)));
             int rightCorner = (Math.min(manDist(0,length,i,j), manDist(length,length,i,j)));
 
-            double c = (Math.log(maxVal) / Math.log(2));
+            int c = 8;
             int bestCorner = Math.min(leftCorner, rightCorner);
 
             placementSCore -= (bestCorner * c);
@@ -390,7 +413,7 @@ public class AISolver
             int minLeft = Math.min(leftTopCorner, leftBottomCorner);
             int minRight = Math.min(rightTopCorner, rightBottomCorner);
 
-            double c = (Math.log(secondMaxVal) / Math.log(2));
+            int c = 6;
             placementSCore -= ((Math.min(minLeft, minRight)) * c);
 
             int distToMax = manDist(maxValX, maxValY, i, j);
@@ -410,7 +433,7 @@ public class AISolver
             int minLeft = Math.min(leftTopCorner, leftBottomCorner);
             int minRight = Math.min(rightTopCorner, rightBottomCorner);
 
-            double c = (Math.log(thirdMaxVal) / Math.log(2));
+            int c = 4;
             placementSCore -= ((Math.min(minLeft, minRight)) * c);
 
             int distToMax = manDist(maxValX, maxValY, i, j);
@@ -424,9 +447,9 @@ public class AISolver
         {
             int distToMax = 0;
 
-            if (value == minVal && minVal < minValCutOf)
+            if (value == minVal && minVal < thirdMaxVal)
             {
-                double c = (Math.log(minValCutOf - minVal) / Math.log(2)) / 10;
+                var c = 1;
                 distToMax = manDist(maxValX, maxValY, i, j);
                 minPlacementScore += (distToMax * c);
 
@@ -448,6 +471,7 @@ public class AISolver
         return 0.0;
     }
 
+    // TODO: remove - doesn't currently make any difference
     // perfect structure is when the biggest values are placed in corners
     public static double perfectStructure(
             int[][] arr,
@@ -469,19 +493,19 @@ public class AISolver
 
         if (arr[0][0] == maxVal && secondAndThird.contains(arr[0][1]) && secondAndThird.contains(arr[1][0]))
         {
-            score = 0.6;
+            score = 1.0;
         }
         if (arr[length][0] == maxVal && secondAndThird.contains(arr[length][1]) && secondAndThird.contains(arr[length-1][0]))
         {
-            score = 0.6;
+            score = 1.0;
         }
         if (arr[0][length] == maxVal && secondAndThird.contains(arr[0][length-1]) && secondAndThird.contains(arr[1][length]))
         {
-            score = 0.6;
+            score = 1.0;
         }
         if (arr[length][length] == maxVal && secondAndThird.contains(arr[length][length-1]) && secondAndThird.contains(arr[length-1][length]))
         {
-            score = 0.6;
+            score = 1.0;
         }
 
         return score;
@@ -538,6 +562,17 @@ public class AISolver
         int[] uniqueTilesDesc = unique.stream().sorted(Collections.reverseOrder()).mapToInt(Integer::intValue).toArray();
 
         return new TilesInformation(uniqueTilesAsc, uniqueTilesDesc, maxValueX, maxValueY, tilesSet, tileCounts);
+    }
+
+    private static void printTuningConstants()
+    {
+        System.out.println("\n");
+        System.out.println("#############################################");
+        System.out.println("Variance - " + variC);
+        System.out.println("Empty space - " + emptyC);
+        System.out.println("Placement - " + placeC);
+        System.out.println("Merge - " + mergeC);
+        System.out.println("Group spread - " + groupspreadC);
     }
 
 }
