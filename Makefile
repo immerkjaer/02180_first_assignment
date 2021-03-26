@@ -11,9 +11,9 @@ compile-solver: compile-game-files
 cross-validation: clean compile-solver
 	mkdir -p dumps
 	touch dumps/validation.txt
-	for vC in 0.02 0.035 0.1 ; do \
-		for pC in 0.9 1.3 2.0 ; do \
-			for gsC in 0.3 0.5 1.0 ; do \
+	for vC in 0.02 0.035 0.07 ; do \
+		for pC in 0.6 0.8 1.0 ; do \
+			for gsC in 0.3 0.5 0.7 ; do \
 				echo $$vC $$pC $$gsC ; \
 				java -classpath "classes" src/Main \
 					-vari $$vC \

@@ -62,6 +62,7 @@ public class Main {
 				var solver = new AISolver(variC, placeC, groupspreadC, emptyC, mergeC, true);
 				solver.expectimaxAI(new Game());
 				solver.expectimaxAI(new Game());
+				System.out.println("__________________________________________________________________________________");
 				System.exit(0);
 			}
 		}
