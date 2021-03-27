@@ -1,6 +1,5 @@
 clean:
 	rm -rf classes/*
-	rm -rf dumps
 
 compile-game-files:
 	javac -d "classes" -sourcepath 2048/ 2048/game/Game.java
@@ -24,4 +23,18 @@ cross-validation: clean compile-solver
 					>> dumps/validation.txt ; \
    			done \
 		done \
+	done
+
+check-consistency: clean compile-solver
+	mkdir -p dumps
+	touch dumps/consistency.txt
+	for val in 1 2 3 4 5 6 7 8 9 10 ; do \
+		echo $$val ; \
+		java -classpath "classes" src/Main \
+			-vari 0.02 \
+			-place 1.0 \
+			-groupspread 0.5 \
+			-empty 30 \
+			-merge 7.5 \
+			>> dumps/consistency.txt ; \
 	done

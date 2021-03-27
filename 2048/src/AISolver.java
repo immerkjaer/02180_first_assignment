@@ -51,6 +51,10 @@ public class AISolver
             {
                 depth = 2;
             }
+            else if (game.getGrid().getEmptyLocations().size() <= 2)
+            {
+                depth = 4;
+            }
 
             Grid gridClone = game.getGrid().clone();
             int[] moves = hC.getMovesAsInts();

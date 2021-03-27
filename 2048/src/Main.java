@@ -8,18 +8,18 @@ public class Main {
 	{
 		try
 		{
-			double variC = 0.035;
+			double variC = 0.02;
 			double emptyC = 30;
-			double placeC = 0.8;
+			double placeC = 1.0;
 			double mergeC = 7.5;
-			double groupspreadC = 0.55;
+			double groupspreadC = 0.5;
 
 			if (args.length == 0)
 			{
 				var solver = new AISolver(variC, placeC, groupspreadC, emptyC, mergeC, false);
 				solver.expectimaxAI(new Game());
 
-				Autoplayer.expectimax(new Game());
+//				Autoplayer.expectimax(new Game());
 				System.exit(0);
 			}
 
