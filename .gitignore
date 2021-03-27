@@ -1,6 +1,6 @@
 .idea/
 *.iml
-2048/src/*.class
+*.class
 out/
 .DS_Store
 classes/
