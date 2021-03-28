@@ -1,8 +1,8 @@
-package src;
+package src.solver;
 
-import game.Game;
-import game.Grid;
-import game.Location;
+import src.game.Game;
+import src.game.Grid;
+import src.game.Location;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -178,7 +178,6 @@ public class AISolver
         int[] moves = hC.getMovesAsInts();
         int score = Integer.MIN_VALUE;
         int varianceScore = 0;
-        int monoScore = 0;
         int placementScore = 0;
         int maxValScore = 0;
         int spaceScore = 0;
@@ -276,8 +275,6 @@ public class AISolver
         int maxValX = tilesInformation.getMaxValX();
         int maxValY = tilesInformation.getMaxValY();
         int tilesSet = tilesInformation.getTilesSet();
-        HashMap<Integer,Integer> tileCounts = tilesInformation.getTileCounts();
-        double perfectStructureScaler = perfectStructure(gridArr, uniqueTilesDesc, length);
         int varianceCutOf = uniqueTilesDesc[0];
 
         double mergeScore = 0.0;
@@ -302,15 +299,14 @@ public class AISolver
                     mergeScore += scoreMerging(currentValTransposed, nextValTransposed);
                 }
 
-                placementScore += scorePlacement(currentVal, i, j, uniqueTilesDesc, uniqueTilesAsc, maxValX, maxValY, length, tilesSet, varianceCutOf, tileCounts);
-                Pair varianceAndGroupSpread = scoreVarianceAndGrouping(currentVal, i, j, gridArr, varianceCutOf, length, tileCounts);
+                placementScore += scorePlacement(currentVal, i, j, uniqueTilesDesc, uniqueTilesAsc, maxValX, maxValY, length, tilesSet);
+                Pair varianceAndGroupSpread = scoreVarianceAndGrouping(currentVal, i, j, gridArr, varianceCutOf, length);
                 varianceScore += varianceAndGroupSpread.getFirst();
                 groupSpread += varianceAndGroupSpread.getSecond();
 
             }
         }
 
-        placementScore = placementScore * perfectStructureScaler;
         return new GridScore(varianceScore, placementScore, mergeScore, groupSpread);
     }
 
@@ -320,8 +316,7 @@ public class AISolver
             int j,
             int[][] arr,
             int varianceCutOf,
-            int length,
-            HashMap<Integer, Integer> tileCounts)
+            int length)
     {
         double variance = 0.0;
         double groupSpread = 0.0;
@@ -376,9 +371,7 @@ public class AISolver
             int maxValX,
             int maxValY,
             int length,
-            int tilesSet,
-            int minValCutOf,
-            HashMap<Integer, Integer> tileCounts)
+            int tilesSet)
     {
         int maxVal = tilesDesc[0];
         if (maxVal < 128 || tilesDesc.length < 3)
@@ -453,7 +446,7 @@ public class AISolver
 
             if (value == minVal && minVal < thirdMaxVal)
             {
-                var c = 1;
+                int c = 1;
                 distToMax = manDist(maxValX, maxValY, i, j);
                 minPlacementScore += (distToMax * c);
 
@@ -475,45 +468,6 @@ public class AISolver
         return 0.0;
     }
 
-    // TODO: remove - doesn't currently make any difference
-    // perfect structure is when the biggest values are placed in corners
-    public static double perfectStructure(
-            int[][] arr,
-            int[] uniqueTilesDesc,
-            int length)
-    {
-        ArrayList<Integer> secondAndThird = new ArrayList<>();
-        int maxVal = uniqueTilesDesc[0];
-
-        if (maxVal < 128)
-        {
-            return 1.0;
-        }
-
-        secondAndThird.add(uniqueTilesDesc[1]);
-        secondAndThird.add(uniqueTilesDesc[0]);
-
-        double score = 1.0;
-
-        if (arr[0][0] == maxVal && secondAndThird.contains(arr[0][1]) && secondAndThird.contains(arr[1][0]))
-        {
-            score = 1.0;
-        }
-        if (arr[length][0] == maxVal && secondAndThird.contains(arr[length][1]) && secondAndThird.contains(arr[length-1][0]))
-        {
-            score = 1.0;
-        }
-        if (arr[0][length] == maxVal && secondAndThird.contains(arr[0][length-1]) && secondAndThird.contains(arr[1][length]))
-        {
-            score = 1.0;
-        }
-        if (arr[length][length] == maxVal && secondAndThird.contains(arr[length][length-1]) && secondAndThird.contains(arr[length-1][length]))
-        {
-            score = 1.0;
-        }
-
-        return score;
-    }
 
     // manhatten distance
     public static int manDist(int x1, int y1, int x2, int y2)
