@@ -1,6 +1,6 @@
-package src;
+package src.solver;
 
-import game.Game;
+import src.game.Game;
 
 public class Main {
 	
@@ -16,10 +16,10 @@ public class Main {
 
 			if (args.length == 0)
 			{
-				var solver = new AISolver(variC, placeC, groupspreadC, emptyC, mergeC, false);
+				AISolver solver = new AISolver(variC, placeC, groupspreadC, emptyC, mergeC, false);
 				solver.expectimaxAI(new Game());
 
-//				Autoplayer.expectimax(new Game());
+//				Autoplayer.ifElseAI(new Game());
 				System.exit(0);
 			}
 
@@ -59,7 +59,7 @@ public class Main {
 					}
 				}
 
-				var solver = new AISolver(variC, placeC, groupspreadC, emptyC, mergeC, true);
+				AISolver solver = new AISolver(variC, placeC, groupspreadC, emptyC, mergeC, true);
 				solver.expectimaxAI(new Game());
 				solver.expectimaxAI(new Game());
 				System.out.println("__________________________________________________________________________________");
