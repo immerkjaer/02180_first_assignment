@@ -178,7 +178,6 @@ public class AISolver
         int[] moves = hC.getMovesAsInts();
         int score = Integer.MIN_VALUE;
         int varianceScore = 0;
-        int monoScore = 0;
         int placementScore = 0;
         int maxValScore = 0;
         int spaceScore = 0;
