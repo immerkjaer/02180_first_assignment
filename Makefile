@@ -2,10 +2,10 @@ clean:
 	rm -rf classes/*
 
 compile-game-files:
-	javac -d "classes" -sourcepath 2048/ 2048/game/Game.java
+	javac -d "classes" -sourcepath 2048/ 2048/src/game/Game.java
 	
 compile-solver: compile-game-files
-	javac -d "classes" -classpath "classes" -sourcepath 2048/ 2048/src/Main.java
+	javac -d "classes" -classpath "classes" -sourcepath 2048/ 2048/src/solver/Main.java
 
 cross-validation: clean compile-solver
 	mkdir -p dumps
@@ -14,7 +14,7 @@ cross-validation: clean compile-solver
 		for pC in 0.6 0.8 1.0 ; do \
 			for gsC in 0.3 0.5 0.7 ; do \
 				echo $$vC $$pC $$gsC ; \
-				java -classpath "classes" src/Main \
+				java -classpath "classes" src/solver/Main \
 					-vari $$vC \
 					-place $$pC \
 					-groupspread $$gsC \
@@ -30,7 +30,7 @@ check-consistency: clean compile-solver
 	touch dumps/consistency.txt
 	for val in 1 2 3 4 5 6 7 8 9 10 ; do \
 		echo $$val ; \
-		java -classpath "classes" src/Main \
+		java -classpath "classes" src/solver/Main \
 			-vari 0.02 \
 			-place 1.0 \
 			-groupspread 0.5 \
