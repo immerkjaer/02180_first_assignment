@@ -6,9 +6,14 @@ import game.Game;
 import game.Grid;
 import game.Location;
 
+
+// Action-based AI that evalutes the expected board after a Down, Left or right move.
+// It will only go up, if it has no other choice.
+
+
 public class Autoplayer {
 	
-	public static int expectimax(Game game) {
+	public static int ifElseAI(Game game) {
         int move = Location.DOWN;
         ArrayList<Integer> invalidMoves = new ArrayList<>();
 

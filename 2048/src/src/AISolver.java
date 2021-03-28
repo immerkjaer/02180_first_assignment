@@ -453,7 +453,7 @@ public class AISolver
 
             if (value == minVal && minVal < thirdMaxVal)
             {
-                var c = 1;
+                int c = 1;
                 distToMax = manDist(maxValX, maxValY, i, j);
                 minPlacementScore += (distToMax * c);
 
