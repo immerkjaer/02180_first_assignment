@@ -1,7 +1,7 @@
-package src;
+package src.solver;
 
-import game.Grid;
-import game.Location;
+import src.game.Grid;
+import src.game.Location;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package game;
+package src.game;
 
 import java.util.LinkedList;
 public class Location implements Cloneable, java.io.Serializable

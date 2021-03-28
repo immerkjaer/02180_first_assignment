@@ -1,4 +1,4 @@
-package src;
+package src.solver;
 
 public class Pair
 {

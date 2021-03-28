@@ -1,11 +1,11 @@
-package game;
+package src.game;
 
 import java.util.*;
 public class Game implements java.io.Serializable
 {
 	private static final long serialVersionUID = 3356339029021499348L;
 
-	// The main board the src.src.game is played on
+	// The main board the game is played on
 	public Grid board;
 
 	// The chance of a 2 appearing
@@ -15,11 +15,11 @@ public class Game implements java.io.Serializable
 	private int turnNumber = 0;
 
 	// Used to start the time limit on the first move
-	// instead of when the src.src.game is created
+	// instead of when the game is created
 	private boolean newGame = true;
 
 	/**
-	 * Creates a default src.src.game with the size 4x4
+	 * Creates a default game with the size 4x4
 	 */
 	public Game()
 	{
@@ -27,12 +27,12 @@ public class Game implements java.io.Serializable
 	}
 	
 	/**
-	 * @param rows The number of rows in the src.src.game
-	 * @param cols The number of columns in the src.src.game
+	 * @param rows The number of rows in the game
+	 * @param cols The number of columns in the game
 	 */
 	public Game(int rows, int cols)
 	{
-		// The main board the src.src.game is played on
+		// The main board the game is played on
 		board = new Grid(rows,cols);
 		
 		// Keeps track of the turn number
@@ -44,9 +44,9 @@ public class Game implements java.io.Serializable
 	}
 	
 	/**
-	 * Creates a new src.src.game as a clone.
+	 * Creates a new game as a clone.
 	 * Only used by the clone method
-	 * @param toClone The src.src.game to clone
+	 * @param toClone The game to clone
 	 */
 	private Game(Game toClone)
 	{
@@ -167,8 +167,8 @@ public class Game implements java.io.Serializable
 	}
 	
 	/**
-	 * @return Whether or not the src.src.game is won
-	 * A src.src.game is won if there is a 2048 tile or greater
+	 * @return Whether or not the game is won
+	 * A game is won if there is a 2048 tile or greater
 	 */
 	public boolean won()
 	{
@@ -195,11 +195,11 @@ public class Game implements java.io.Serializable
 	}
 	
 	/**
-	 * @return If the src.src.game is lost
+	 * @return If the game is lost
 	 */
 	public boolean lost()
 	{
-		// If the board is not filled then the src.src.game is lost
+		// If the board is not filled then the game is lost
 		if(!board.getEmptyLocations().isEmpty())
 			return false;
 		
@@ -255,7 +255,7 @@ public class Game implements java.io.Serializable
 	}
 
 	/**
-	 * @param otherGame The other src.src.game to check
+	 * @param otherGame The other game to check
 	 * @return If the games are equal
 	 * Games are equal if they have the same board and score, 
 	 * even if their history is different.
@@ -267,7 +267,7 @@ public class Game implements java.io.Serializable
 	
 	/**
 	 * Used to avoid creating aliases 
-	 * @return A clone of the src.src.game
+	 * @return A clone of the game
 	 */
 	public Game clone()
 	{
@@ -276,7 +276,7 @@ public class Game implements java.io.Serializable
 	}
 
 	/**
-	 * @return The score of the src.src.game
+	 * @return The score of the game
 	 */
 	public int getScore()
 	{
@@ -284,7 +284,7 @@ public class Game implements java.io.Serializable
 	}
 	
 	/**
-	 * @return The current turn number of the src.src.game
+	 * @return The current turn number of the game
 	 */
 	public int getTurns()
 	{
@@ -292,7 +292,7 @@ public class Game implements java.io.Serializable
 	}
 	
 	/**
-	 * @return The grid of the src.src.game
+	 * @return The grid of the game
 	 */
 	public Grid getGrid()
 	{
@@ -300,14 +300,14 @@ public class Game implements java.io.Serializable
 	}
 	
 	/**
-	 * Only used in the hideTileValues and speedMode methods to print the src.src.game
+	 * Only used in the hideTileValues and speedMode methods to print the game
 	 */
 	public void printGame()
 	{
 		System.out.println(toString());
 	}
 	
-	/** @return a string of the src.src.game in the form:
+	/** @return a string of the game in the form:
 	---------------------------------------------
 	||  Turn #8  Score: 20  Moves Left: 3
 	---------------------------------------------

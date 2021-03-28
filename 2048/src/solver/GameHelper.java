@@ -1,12 +1,12 @@
-package src;
+package src.solver;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import game.Game;
-import game.Location;
-import game.Grid;
+import src.game.Game;
+import src.game.Location;
+import src.game.Grid;
 
 public class GameHelper {
 	

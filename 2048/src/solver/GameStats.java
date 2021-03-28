@@ -1,6 +1,6 @@
-package src;
+package src.solver;
 
-import game.Grid;
+import src.game.Grid;
 
 import java.util.ArrayList;
 
