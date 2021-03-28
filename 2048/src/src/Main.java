@@ -16,7 +16,7 @@ public class Main {
 
 			if (args.length == 0)
 			{
-				var solver = new AISolver(variC, placeC, groupspreadC, emptyC, mergeC, false);
+				AISolver solver = new AISolver(variC, placeC, groupspreadC, emptyC, mergeC, false);
 				solver.expectimaxAI(new Game());
 
 //				Autoplayer.expectimax(new Game());
@@ -59,7 +59,7 @@ public class Main {
 					}
 				}
 
-				var solver = new AISolver(variC, placeC, groupspreadC, emptyC, mergeC, true);
+				AISolver solver = new AISolver(variC, placeC, groupspreadC, emptyC, mergeC, true);
 				solver.expectimaxAI(new Game());
 				solver.expectimaxAI(new Game());
 				System.out.println("__________________________________________________________________________________");
