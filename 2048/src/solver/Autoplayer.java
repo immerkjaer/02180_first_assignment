@@ -1,14 +1,14 @@
-package src;
+package src.solver;
 
 import java.util.ArrayList;
 
-import game.Game;
-import game.Grid;
-import game.Location;
+import src.game.Game;
+import src.game.Grid;
+import src.game.Location;
 
 public class Autoplayer {
 	
-	public static int expectimax(Game game) {
+	public static int ifElseAI(Game game) {
         int move = Location.DOWN;
         ArrayList<Integer> invalidMoves = new ArrayList<>();
 
