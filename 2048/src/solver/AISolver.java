@@ -32,12 +32,12 @@ public class AISolver
         AISolver.isCrossValidation = isCrossValidation;
     }
 
+    // Play the game until it is lost. For each move calculate the total score using the expectimax algorithm and select the best as the chosen move.
     public static LinkedList<GameStats> expectimaxAI(Game game) throws InterruptedException, ExecutionException {
         HelperFunctions hC = new HelperFunctions();
         LinkedList<GameStats> decisionStats = new LinkedList<>();
 
         ExecutorService WORKER_THREAD_POOL = Executors.newFixedThreadPool(10);
-
 
         while (!(game.lost()))
         {
@@ -65,6 +65,7 @@ public class AISolver
 
             for (int move : moves)
             {
+                // Do not consider moves that does nothing.
                 if (noGoMoves.contains(move))
                 {
                     continue;
@@ -74,7 +75,7 @@ public class AISolver
                 Grid newGrid = hC.movePiecesSomeDir(oldGrid, move);
                 List<Location> emptyLocsForMove = newGrid.getEmptyLocations();
 
-                callables.add(new RunMove(newGrid, oldGrid, hC, depth, move, emptyLocsForMove.size()));
+                callables.add(new RunMove(newGrid, hC, depth, move, emptyLocsForMove.size()));
 
 
             }
@@ -89,7 +90,6 @@ public class AISolver
             for (MoveToConsider move : finalScores)
             {
                 long scoreForMove = move.getFinalScore().getTotalScore();
-//                scoreForMove = scoreForMove / move.getInitialEmpty();
 
                 if (scoreForMove > score)
                 {
@@ -99,6 +99,7 @@ public class AISolver
                 }
             }
 
+            // The remainder of this function is for debugging purposes (saved the most recent 30 states)
             GameStats stats = new GameStats(chosenMoveStats, game.getTurns(), noGoMoves, game.getGrid(), bestMove, game.getScore(), finalScores, game.highestPiece());
             decisionStats.addLast(stats);
             if (decisionStats.size() >= 30)
@@ -120,16 +121,15 @@ public class AISolver
 
     }
 
+    // If the maximum depth has been reached then evaluate the board otherwise go down another level (in the search tree).
     public static FinalScore getMoveScore(
             Grid grid,
-            Grid previousGrid,
             HelperFunctions hC,
-            int moveDir,
             int depth)
     {
         if (depth == 0)
         {
-            return finaleScoring(grid, previousGrid, moveDir, hC);
+            return finaleScoring(grid, hC);
         }
 
         int score = 0;
@@ -191,7 +191,7 @@ public class AISolver
             Grid gridSomeMove = grid.clone();
             Grid newGrid = hC.movePiecesSomeDir(gridSomeMove, move);
 
-            FinalScore moveScore = getMoveScore(newGrid, grid, hC, move, depth);
+            FinalScore moveScore = getMoveScore(newGrid, hC, depth);
             if (moveScore.getTotalScore() > score)
             {
                 score = moveScore.getTotalScore();
@@ -217,10 +217,9 @@ public class AISolver
                 score);
     }
 
+    // Scores the current board for the cut-off nodes.
     public static FinalScore finaleScoring(
             Grid grid,
-            Grid previousGrid,
-            int moveDir,
             HelperFunctions hC)
     {
         TilesInformation tilesInformation = getTilesInformation(grid.getArray());
@@ -261,6 +260,8 @@ public class AISolver
                 (int) totalScore);
     }
 
+    // This is just a loop over the board that is used for the actual scoring functions.
+    // Created too make sure the code only loops over the board as much as necessary.
     public static GridScore scoreBoard(
             Grid grid,
             TilesInformation tilesInformation,
@@ -310,6 +311,8 @@ public class AISolver
         return new GridScore(varianceScore, placementScore, mergeScore, groupSpread);
     }
 
+    // Check the variance for each piece against each other piece on the board.
+    // Also check the distance for each piece against each other piece with the same value (grouping).
     public static Pair scoreVarianceAndGrouping(
             int currentValue,
             int i,
@@ -362,6 +365,7 @@ public class AISolver
         return new Pair(variance, groupSpread);
     }
 
+    // Move higher pieces towards the corners and maximaize distance from smaller pieces to higher pieces.
     public static double scorePlacement(
             int value,
             int i,
@@ -457,6 +461,7 @@ public class AISolver
         return placementSCore;
     }
 
+    // Merging higher pieces scores higher than merging smaller pieces.
     public static double scoreMerging(
             int v1,
             int v2)
@@ -469,13 +474,13 @@ public class AISolver
     }
 
 
-    // manhatten distance
+    // Manhatten distance
     public static int manDist(int x1, int y1, int x2, int y2)
     {
         return Math.abs(x1-x2) + Math.abs(y1-y2);
     }
 
-    // useful information about current grid
+    // Useful information about current grid
     public static TilesInformation getTilesInformation(int[][] arr)
     {
         ArrayList<Integer> unique = new ArrayList<>();
@@ -522,6 +527,7 @@ public class AISolver
         return new TilesInformation(uniqueTilesAsc, uniqueTilesDesc, maxValueX, maxValueY, tilesSet, tileCounts);
     }
 
+    // Used for cross-validation
     private static void printTuningConstants()
     {
         System.out.println("\n");

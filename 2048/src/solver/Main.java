@@ -3,7 +3,8 @@ package src.solver;
 import src.game.Game;
 
 public class Main {
-	
+
+	// Running the program with args is only for doing cross-validation!
 	public static void main(String[] args)
 	{
 		try
