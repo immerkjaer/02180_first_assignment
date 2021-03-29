@@ -4,7 +4,6 @@ import java.util.LinkedList;
 public class Location implements Cloneable, java.io.Serializable
 {
 	private static final long serialVersionUID = -8080786867527968562L;
-
 	public final static int UP = 0;
 	public final static int RIGHT = 1;
 	public final static int DOWN = 2;
@@ -87,7 +86,7 @@ public class Location implements Cloneable, java.io.Serializable
 						locs.add(new Location(nextRow, nextCol));
 				}
 			}
-
+      
 		return locs;
 	}
 
@@ -142,7 +141,6 @@ public class Location implements Cloneable, java.io.Serializable
 			case LEFT: return getLeft();
 
 			default: return null;
-
 		}
 	}
 

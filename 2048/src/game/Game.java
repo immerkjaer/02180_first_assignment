@@ -111,7 +111,7 @@ public class Game implements java.io.Serializable
 					// If they have the same value or if zenMode is enabled, combine
 					if(board.get(from) == board.get(to))
 						add(from, to);
-
+            
 					return;
 				}
 			}
@@ -205,7 +205,6 @@ public class Game implements java.io.Serializable
 
 		int current = -1;
 		int next;
-
 		// Check if two of the same number are next to each
 		// other in a row.
 		for(int row = 0; row < board.getNumRows(); row++)
@@ -264,6 +263,7 @@ public class Game implements java.io.Serializable
 	{
 		return board.equals(otherGame.getGrid()) && score == otherGame.getScore();
 	}
+
 
 	/**
 	 * Used to avoid creating aliases
