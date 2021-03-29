@@ -38,3 +38,6 @@ check-consistency: clean compile-solver
 			-merge 7.5 \
 			>> dumps/consistency.txt ; \
 	done
+
+run: clean compile-solver
+	java -classpath "classes" src/solver/Main
